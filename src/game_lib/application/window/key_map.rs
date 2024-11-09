@@ -1,10 +1,6 @@
 use log::warn;
 
-use winit::{
-    event::ElementState,
-    keyboard::KeyCode,
-};
-
+use winit::{event::ElementState, keyboard::KeyCode};
 
 #[derive(PartialEq, Eq, Default, Clone, Copy)]
 pub enum KeyState {

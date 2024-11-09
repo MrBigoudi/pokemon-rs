@@ -1,5 +1,11 @@
 use log::warn;
-use winit::{application::ApplicationHandler, dpi::LogicalPosition, event::{DeviceId, KeyEvent, StartCause, WindowEvent}, event_loop::ActiveEventLoop, keyboard::PhysicalKey, window::WindowId};
+use winit::{
+    application::ApplicationHandler,
+    event::{DeviceId, KeyEvent, StartCause, WindowEvent},
+    event_loop::ActiveEventLoop,
+    keyboard::PhysicalKey,
+    window::WindowId,
+};
 
 use crate::application::{core::debug::ErrorCode, Application};
 
@@ -34,16 +40,16 @@ impl Application {
         Ok(())
     }
 
+    #[cfg(not(target_arch = "wasm32"))]
     pub fn on_mouse_moved(
         &mut self,
         _device_id: DeviceId,
-        new_position: LogicalPosition<f64>,
+        new_position: winit::dpi::LogicalPosition<f64>,
     ) -> Result<(), ErrorCode> {
         self.mouse_position = new_position;
         Ok(())
     }
 }
-
 
 impl ApplicationHandler for Application {
     fn resumed(&mut self, event_loop: &ActiveEventLoop) {
@@ -98,6 +104,8 @@ impl ApplicationHandler for Application {
                     panic!("Failed to handle keyboard input event: {:?}", err);
                 }
             }
+
+            #[cfg(not(target_arch = "wasm32"))]
             WindowEvent::CursorMoved {
                 position,
                 device_id,

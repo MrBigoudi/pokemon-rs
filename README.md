@@ -8,7 +8,18 @@ To run the code in desktop mode
 cargo run
 ```
 
-To build the code in WASM
+To run the code in debug mode
 ```sh
-wasm-pack build --target web
+RUST_LOG=debug cargo run
+```
+
+To run the code in the web
+```sh
+./run_wasm.sh -h
+./run_wasm.sh -c
+```
+
+To just compile the code in WASM
+```sh
+wasm-pack build --target web  
 ```

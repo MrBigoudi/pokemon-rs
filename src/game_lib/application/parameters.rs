@@ -9,8 +9,8 @@ impl Default for ApplicationParameters {
     fn default() -> Self {
         Self {
             window_title: String::from("untitled"),
-            window_width: 1600,
-            window_height: 900,
+            window_width: 800,
+            window_height: 600,
         }
     }
 }

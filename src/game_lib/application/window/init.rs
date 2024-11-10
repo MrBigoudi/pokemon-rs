@@ -45,13 +45,17 @@ impl WindowContext {
 
     #[cfg(target_arch = "wasm32")]
     fn init_window_attributes_web(
-        _parameters: &ApplicationParameters,
+        parameters: &ApplicationParameters,
         _event_loop: &ActiveEventLoop,
     ) -> WindowAttributes {
         use winit::platform::web::WindowAttributesExtWebSys;
+
         WindowAttributes::default()
             .with_append(true)
-            .with_inner_size(PhysicalSize::new(450, 400))
+            .with_inner_size(PhysicalSize::new(
+                parameters.window_width as u32,
+                parameters.window_height as u32,
+            ))
     }
 
     pub fn init(

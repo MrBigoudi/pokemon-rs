@@ -5,4 +5,7 @@ pub enum ErrorCode {
     Winit,
     Web,
     Unknown,
+    SyncError,
+    NotInitialized,
+    AlreadyInitialized,
 }

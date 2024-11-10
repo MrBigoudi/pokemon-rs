@@ -28,7 +28,7 @@ impl Default for Instant {
 impl Instant {
     /// Creates a new `Instant` at the current time
     pub fn now() -> Self {
-        cfg_if!{
+        cfg_if! {
             if #[cfg(target_arch = "wasm32")] {
                 let performance = window()
                     .expect("No global `window` exists")
@@ -45,12 +45,11 @@ impl Instant {
     }
 }
 
-
 impl Sub for Instant {
     type Output = Duration;
 
     fn sub(self, other: Instant) -> Duration {
-        cfg_if!{
+        cfg_if! {
             if #[cfg(target_arch = "wasm32")] {
                 (self.inner - other.inner) as Duration
             } else {

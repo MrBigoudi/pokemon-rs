@@ -1,6 +1,6 @@
 pub mod application;
 
-use application::Application;
+use application::{app::Application, parameters::ApplicationParameters};
 
 use cfg_if::cfg_if;
 #[cfg(target_arch = "wasm32")]
@@ -54,7 +54,8 @@ pub fn run_game() {
     }
 
     // Run the app
-    if let Err(err) = Application::run() {
+    let parameters = ApplicationParameters::default();
+    if let Err(err) = Application::run(parameters) {
         panic!("Failed to run the application: {:?}", err);
     }
 }

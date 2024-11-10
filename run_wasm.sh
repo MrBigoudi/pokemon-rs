@@ -19,6 +19,12 @@ while [[ "$#" -gt 0 ]]; do
     shift
 done
 
+# Check if pkg directory exists; if not, set RUN_WASM_PACK to true
+if [[ ! -d "pkg" ]]; then
+    echo "pkg folder not found. Running wasm-pack build..."
+    RUN_WASM_PACK=true
+fi
+
 # Run wasm-pack if -c option was specified
 if [[ "$RUN_WASM_PACK" == "true" ]]; then
     echo "Running wasm-pack..."

@@ -60,7 +60,7 @@ impl ApplicationHandler for ApplicationState {
                 warn!("The application is not initialized correctly...")
             }
             ApplicationState::Initialized(app) => {
-                app.update().expect("Failed to update the application");
+                app.on_update().expect("Failed to update the application");
             }
         }
     }
@@ -83,8 +83,11 @@ impl ApplicationHandler for ApplicationState {
             WindowEvent::CloseRequested => {
                 event_loop.exit();
             }
+            WindowEvent::Resized(new_size) => {
+                app.on_resize(new_size).expect("Failed to handle resizing event");
+            }
             WindowEvent::RedrawRequested => {
-                app.on_redraw().expect("Failed to handle redrawing event");
+                app.on_render().expect("Failed to handle redrawing event");
             }
             WindowEvent::KeyboardInput {
                 device_id,

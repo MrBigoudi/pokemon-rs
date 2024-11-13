@@ -127,11 +127,4 @@ impl Application {
         Ok(())
     }
 
-    pub fn update(&mut self) -> Result<(), ErrorCode> {
-        // Update delta time
-        let now = Instant::now();
-        self.delta_time = now - self.last_frame;
-        self.last_frame = now;
-        Ok(())
-    }
 }

@@ -6,6 +6,7 @@ use winit::{dpi::PhysicalSize, window::Window};
 use crate::application::{core::debug::ErrorCode, parameters::ApplicationParameters};
 
 pub struct State {
+    pub size: Mutex<PhysicalSize<u32>>,
     pub surface: wgpu::Surface<'static>,
     pub config: Mutex<wgpu::SurfaceConfiguration>,
     pub device: wgpu::Device,
@@ -99,21 +100,10 @@ impl State {
         }
     }
 
-    fn init_surface_config(
+    fn init_size(
         parameters: &ApplicationParameters,
-        surface: &wgpu::Surface<'static>,
-        adapter: &wgpu::Adapter,
         window: Arc<Window>,
-    ) -> Result<wgpu::SurfaceConfiguration, ErrorCode> {
-        let surface_caps = surface.get_capabilities(adapter);
-
-        let surface_format = surface_caps
-            .formats
-            .iter()
-            .find(|f| f.is_srgb())
-            .copied()
-            .unwrap_or(surface_caps.formats[0]);
-
+    ) -> PhysicalSize<u32> {
         let mut size = window.inner_size();
         if size.width == 0 || size.height == 0 {
             warn!("The size must be greater than 0 when configuring the surface, default back to initial parameters");
@@ -122,6 +112,22 @@ impl State {
                 parameters.window_height as u32,
             );
         }
+        size
+    }
+
+    fn init_surface_config(
+        surface: &wgpu::Surface<'static>,
+        adapter: &wgpu::Adapter,
+        size: &PhysicalSize<u32>,
+    ) -> wgpu::SurfaceConfiguration {
+        let surface_caps = surface.get_capabilities(adapter);
+
+        let surface_format = surface_caps
+            .formats
+            .iter()
+            .find(|f| f.is_srgb())
+            .copied()
+            .unwrap_or(surface_caps.formats[0]);
 
         let present_mode = if surface_caps
             .present_modes
@@ -141,7 +147,7 @@ impl State {
             wgpu::CompositeAlphaMode::Opaque
         };
 
-        Ok(wgpu::SurfaceConfiguration {
+        wgpu::SurfaceConfiguration {
             // Describes how the surface textures will be used
             usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
             // Describes how the textures will be stored on the GPU
@@ -153,7 +159,7 @@ impl State {
             alpha_mode,
             view_formats: vec![],
             desired_maximum_frame_latency: 2,
-        })
+        }
     }
 
     pub async fn new(
@@ -164,14 +170,16 @@ impl State {
         let surface = Self::init_surface(&instance, Arc::clone(&window))?;
         let adapter = Self::init_adapter(&instance, &surface).await?;
         let (device, queue) = Self::init_device_and_queue(&adapter).await?;
+        let size = Self::init_size(parameters, Arc::clone(&window));
         let config = Mutex::new(Self::init_surface_config(
-            parameters,
             &surface,
             &adapter,
-            Arc::clone(&window),
-        )?);
+            &size,
+        ));
+        let size = Mutex::new(size);
 
         Ok(Self {
+            size,
             surface,
             config,
             device,

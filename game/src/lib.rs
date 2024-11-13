@@ -1,8 +1,6 @@
-pub mod application;
-
-use application::{app::Application, parameters::ApplicationParameters};
-
 use cfg_if::cfg_if;
+use core_lib::application::{app::Application, parameters::ApplicationParameters};
+
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
 
@@ -11,7 +9,7 @@ fn init_env_logger() {
     // Create the output logging file
     use std::fs::File;
     use std::io::Write;
-    let target = Box::new(File::create("output.log").expect("Failed to create the log file"));
+    let target = Box::new(File::create("game_output.log").expect("Failed to create the log file"));
     env_logger::Builder::from_default_env()
         .format(|buf, record| {
             // Split the message by newlines and write each line separately with a prefix
@@ -40,9 +38,9 @@ fn init_env_logger() {
         .init();
 }
 
-// TODO: Update it for WASM
+
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen(start))]
-pub fn run_game() {
+pub fn run() {
     // Init the logger
     cfg_if! {
         if #[cfg(target_arch = "wasm32")] {

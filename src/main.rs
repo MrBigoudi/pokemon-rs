@@ -1,3 +1,3 @@
 fn main() {
-    game_lib::run_game();
+    core_lib::run_game();
 }

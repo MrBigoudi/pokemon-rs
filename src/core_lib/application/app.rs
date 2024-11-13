@@ -1,10 +1,10 @@
 use std::{collections::HashMap, sync::Arc};
 
-use crate::application::core::debug::ErrorCode;
+use crate::application::utils::debug::ErrorCode;
 use crate::application::global::set_global_wgpu_state;
 use log::{error, info};
 
-use super::core::time::{Duration, Instant};
+use super::utils::time::{Duration, Instant};
 use super::parameters::ApplicationParameters;
 use super::state::ApplicationState;
 use super::wgpu_context::state::State;

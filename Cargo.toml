@@ -7,8 +7,8 @@ license = "MIT/Apache-2.0"
 repository = "https://github.com/MrBigoudi/pokemon-rs"
 
 [lib]
-name = "game_lib"
-path = "src/game_lib/lib.rs"
+name = "core_lib"
+path = "src/core_lib/lib.rs"
 # We need rlib to run wgpu in a desktop environment and cdylib to create the Web Assembly
 crate-type = ["cdylib", "rlib"]
 

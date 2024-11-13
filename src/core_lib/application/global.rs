@@ -2,7 +2,7 @@ use std::sync::{Once, Arc};
 
 use log::error;
 
-use super::{core::debug::ErrorCode, wgpu_context::state::State};
+use super::{utils::debug::ErrorCode, wgpu_context::state::State};
 static INIT: Once = Once::new();
 static mut GLOBAL_WGPU_STATE: Option<Arc<State>> = None;
 

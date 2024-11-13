@@ -36,10 +36,7 @@ if [[ "$RUN_WASM_PACK" == "true" ]]; then
 fi
 
 # Start a Python HTTP server in the background
-echo "Starting Python HTTP server on port 8080..."
-python3 -m http.server 8080 &
-SERVER_PID=$!
-echo "Python server started with PID $SERVER_PID"
+python3 server.py
 
 # Open index.html in Firefox
 echo "Opening index.html in Firefox..."
@@ -51,10 +48,5 @@ echo "Firefox opened with PID $FIREFOX_PID"
 
 # Wait for Firefox to close
 wait $FIREFOX_PID
-
-# When Firefox closes, kill the Python server
-echo "Closing Python server with PID $SERVER_PID..."
-kill $SERVER_PID
-echo "Python server stopped"
 
 echo "Script finished"

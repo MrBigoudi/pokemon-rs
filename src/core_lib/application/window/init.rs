@@ -7,7 +7,7 @@ use winit::{
     window::{Window, WindowAttributes},
 };
 
-use crate::application::{core::debug::ErrorCode, parameters::ApplicationParameters};
+use crate::application::{utils::debug::ErrorCode, parameters::ApplicationParameters};
 
 pub struct WindowContext;
 

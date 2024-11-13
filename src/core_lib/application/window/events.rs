@@ -4,7 +4,7 @@ use winit::{
     dpi::PhysicalSize, event::{DeviceId, KeyEvent}, keyboard::PhysicalKey
 };
 
-use crate::application::{app::Application, core::{debug::ErrorCode, time::Instant}};
+use crate::application::{app::Application, utils::{debug::ErrorCode, time::Instant}};
 
 use super::key_map::{Key, KeyState};
 

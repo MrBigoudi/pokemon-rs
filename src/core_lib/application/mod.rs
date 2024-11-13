@@ -1,5 +1,5 @@
 pub mod app;
-pub mod core;
+pub mod utils;
 pub mod global;
 pub mod parameters;
 pub mod state;

@@ -1,7 +1,7 @@
 use log::{error, warn};
 use winit::{dpi::PhysicalSize, event::WindowEvent};
 
-use crate::application::core::{debug::ErrorCode, time::Duration};
+use crate::application::utils::{debug::ErrorCode, time::Duration};
 
 use super::state::State;
 

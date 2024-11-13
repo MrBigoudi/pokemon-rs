@@ -3,7 +3,7 @@ use std::sync::{Arc, Mutex};
 use log::{error, warn};
 use winit::{dpi::PhysicalSize, window::Window};
 
-use crate::application::{core::debug::ErrorCode, parameters::ApplicationParameters};
+use crate::application::{utils::debug::ErrorCode, parameters::ApplicationParameters};
 
 pub struct State {
     pub size: Mutex<PhysicalSize<u32>>,

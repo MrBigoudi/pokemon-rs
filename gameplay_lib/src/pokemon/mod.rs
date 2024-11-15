@@ -1,13 +1,15 @@
 use abilities::Ability;
 
+use moves::Move;
 use pokedex::entry::PokedexEntry;
 
 pub mod abilities;
-pub mod moves;
 pub mod egg;
+pub mod evolutions;
+pub mod moves;
 pub mod pokedex;
-pub mod types;
 pub mod stats;
+pub mod types;
 
 pub type Id = usize;
 
@@ -21,4 +23,9 @@ pub struct Pokemon {
     pub is_shiny: bool,
 
     pub friendship: u8,
+
+    pub move_1: Move,
+    pub move_2: Option<Move>,
+    pub move_3: Option<Move>,
+    pub move_4: Option<Move>,
 }

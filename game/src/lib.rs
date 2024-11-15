@@ -38,7 +38,6 @@ fn init_env_logger() {
         .init();
 }
 
-
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen(start))]
 pub fn run() {
     // Init the logger
@@ -50,6 +49,9 @@ pub fn run() {
             init_env_logger();
         }
     }
+
+    // TODO: Remove this test code
+    let _ = gameplay_lib::pokemon::pokedex::get_pokedex();
 
     // Run the app
     let parameters = ApplicationParameters::default();

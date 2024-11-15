@@ -1,13 +1,10 @@
 use crate::pokemon::{abilities::Ability, stats::StatType};
 
-use super::breeding::GenderRatio;
-
 pub type EvYield = (StatType, u8);
 
 pub struct WildAttributes {
     pub abilities: Vec<&'static Ability>,
-    pub gender_ratio: GenderRatio,
-    
+
     pub catch_rate: u8,
 
     pub base_friendship: u8,

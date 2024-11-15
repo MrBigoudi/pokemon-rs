@@ -1,10 +1,14 @@
-
 use log::error;
 use winit::{
-    dpi::PhysicalSize, event::{DeviceId, KeyEvent}, keyboard::PhysicalKey
+    dpi::PhysicalSize,
+    event::{DeviceId, KeyEvent},
+    keyboard::PhysicalKey,
 };
 
-use crate::application::{app::Application, utils::{debug::ErrorCode, time::Instant}};
+use crate::application::{
+    app::Application,
+    utils::{debug::ErrorCode, time::Instant},
+};
 
 use super::key_map::{Key, KeyState};
 
@@ -14,16 +18,22 @@ impl Application {
     }
 
     pub fn on_render(&mut self) -> Result<(), ErrorCode> {
-        if let Err(err) = self.wgpu_state.on_render(){
-            error!("Failed to handle a render event on the wgpu state: {:?}", err);
+        if let Err(err) = self.wgpu_state.on_render() {
+            error!(
+                "Failed to handle a render event on the wgpu state: {:?}",
+                err
+            );
             return Err(ErrorCode::Wgpu);
         }
         Ok(())
     }
 
-    pub fn on_resize(&mut self, new_size: PhysicalSize<u32>) -> Result<(), ErrorCode>{
-        if let Err(err) = self.wgpu_state.on_resize(new_size){
-            error!("Failed to handle a resize event on the wgpu state: {:?}", err);
+    pub fn on_resize(&mut self, new_size: PhysicalSize<u32>) -> Result<(), ErrorCode> {
+        if let Err(err) = self.wgpu_state.on_resize(new_size) {
+            error!(
+                "Failed to handle a resize event on the wgpu state: {:?}",
+                err
+            );
             return Err(ErrorCode::Wgpu);
         }
         Ok(())
@@ -35,8 +45,11 @@ impl Application {
         self.delta_time = now - self.last_frame;
         self.last_frame = now;
         // Update state
-        if let Err(err) = self.wgpu_state.on_update(&self.delta_time){
-            error!("Failed to handle an update event on the wgpu state: {:?}", err);
+        if let Err(err) = self.wgpu_state.on_update(&self.delta_time) {
+            error!(
+                "Failed to handle an update event on the wgpu state: {:?}",
+                err
+            );
             return Err(ErrorCode::Wgpu);
         }
         Ok(())

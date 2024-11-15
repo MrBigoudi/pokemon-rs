@@ -1,3 +1,1 @@
-pub struct Ability {
-    
-}
+pub struct Ability {}

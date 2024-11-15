@@ -1,12 +1,12 @@
 use std::{collections::HashMap, sync::Arc};
 
-use crate::application::utils::debug::ErrorCode;
 use crate::application::global::set_global_wgpu_state;
+use crate::application::utils::debug::ErrorCode;
 use log::{error, info};
 
-use super::utils::time::{Duration, Instant};
 use super::parameters::ApplicationParameters;
 use super::state::ApplicationState;
+use super::utils::time::{Duration, Instant};
 use super::wgpu_context::state::State;
 use super::window::{
     init::WindowContext,
@@ -126,5 +126,4 @@ impl Application {
 
         Ok(())
     }
-
 }

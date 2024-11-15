@@ -1,4 +1,2 @@
 #[derive(Debug)]
-pub enum Category {
-
-}
+pub enum Category {}

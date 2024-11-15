@@ -1,4 +1,2 @@
 #[derive(Debug)]
-pub enum Name {
-
-}
+pub enum Name {}

@@ -3,7 +3,7 @@ use std::sync::{Arc, Mutex};
 use log::{error, warn};
 use winit::{dpi::PhysicalSize, window::Window};
 
-use crate::application::{utils::debug::ErrorCode, parameters::ApplicationParameters};
+use crate::application::{parameters::ApplicationParameters, utils::debug::ErrorCode};
 
 pub struct State {
     pub size: Mutex<PhysicalSize<u32>>,
@@ -100,10 +100,7 @@ impl State {
         }
     }
 
-    fn init_size(
-        parameters: &ApplicationParameters,
-        window: Arc<Window>,
-    ) -> PhysicalSize<u32> {
+    fn init_size(parameters: &ApplicationParameters, window: Arc<Window>) -> PhysicalSize<u32> {
         let mut size = window.inner_size();
         if size.width == 0 || size.height == 0 {
             warn!("The size must be greater than 0 when configuring the surface, default back to initial parameters");
@@ -171,11 +168,7 @@ impl State {
         let adapter = Self::init_adapter(&instance, &surface).await?;
         let (device, queue) = Self::init_device_and_queue(&adapter).await?;
         let size = Self::init_size(parameters, Arc::clone(&window));
-        let config = Mutex::new(Self::init_surface_config(
-            &surface,
-            &adapter,
-            &size,
-        ));
+        let config = Mutex::new(Self::init_surface_config(&surface, &adapter, &size));
         let size = Mutex::new(size);
 
         Ok(Self {

@@ -36,4 +36,5 @@ pub struct BreedingAttributes {
     pub egg_group_1: EggGroup,
     pub egg_group_2: Option<EggGroup>,
     pub hatch_time: Option<u8>,
+    pub gender_ratio: GenderRatio,
 }

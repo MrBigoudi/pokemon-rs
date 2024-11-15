@@ -84,7 +84,8 @@ impl ApplicationHandler for ApplicationState {
                 event_loop.exit();
             }
             WindowEvent::Resized(new_size) => {
-                app.on_resize(new_size).expect("Failed to handle resizing event");
+                app.on_resize(new_size)
+                    .expect("Failed to handle resizing event");
             }
             WindowEvent::RedrawRequested => {
                 app.on_render().expect("Failed to handle redrawing event");

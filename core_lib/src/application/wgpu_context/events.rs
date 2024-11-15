@@ -9,7 +9,7 @@ impl State {
     pub fn on_resize(&self, new_size: PhysicalSize<u32>) -> Result<(), ErrorCode> {
         if new_size.width == 0 || new_size.height == 0 {
             warn!("Can't have a surface size that is zero");
-            return Ok(())
+            return Ok(());
         }
         {
             let mut config = self.config.lock().unwrap();
@@ -21,7 +21,8 @@ impl State {
             size.width = new_size.width;
             size.height = new_size.height;
         }
-        self.surface.configure(&self.device, &self.config.lock().unwrap());
+        self.surface
+            .configure(&self.device, &self.config.lock().unwrap());
         Ok(())
     }
 
@@ -36,7 +37,7 @@ impl State {
     }
 
     pub fn on_render(&self) -> Result<(), ErrorCode> {
-        let output = match self.surface.get_current_texture(){
+        let output = match self.surface.get_current_texture() {
             Ok(output) => output,
             Err(err) => {
                 error!("Failed to get the current surface texture: {:?}", err);
@@ -44,14 +45,17 @@ impl State {
             }
         };
 
-
         // Create a command buffer
-        let mut command_encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { 
-            label: Some("Render Command Encoder")  
-        });
+        let mut command_encoder =
+            self.device
+                .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                    label: Some("Render Command Encoder"),
+                });
 
         // Create a render pass
-        let view = output.texture.create_view(&wgpu::TextureViewDescriptor::default());
+        let view = output
+            .texture
+            .create_view(&wgpu::TextureViewDescriptor::default());
         {
             let _render_pass = command_encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                 label: Some("Render Pass"),

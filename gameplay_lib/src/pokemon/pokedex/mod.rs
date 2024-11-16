@@ -6,11 +6,14 @@ pub mod names;
 pub mod wild_attributes;
 
 use entry::PokedexEntry;
+
+#[cfg(not(target_arch = "wasm32"))]
 use location_macros::workspace_dir;
-use log::error;
+
+
 use std::{collections::HashMap, path::PathBuf, sync::OnceLock};
 
-use crate::core::debug::ErrorCode;
+use crate::core::{debug::ErrorCode, toml::Toml};
 
 pub type Id = u16;
 
@@ -32,33 +35,16 @@ pub fn get_pokedex() -> &'static Pokedex {
 
 impl Pokedex {
     fn get_toml() -> Result<toml::Table, ErrorCode> {
+        #[cfg(not(target_arch = "wasm32"))]
         let mut pokedex_toml_path = PathBuf::from(workspace_dir!());
+        #[cfg(target_arch = "wasm32")]
+        let mut pokedex_toml_path = PathBuf::from("/");
         pokedex_toml_path.push("assets");
         pokedex_toml_path.push("data");
         pokedex_toml_path.push("pokedex");
         pokedex_toml_path.set_extension("toml");
 
-        let pokedex_toml = match std::fs::read_to_string(&pokedex_toml_path) {
-            Ok(content) => content,
-            Err(err) => {
-                error!(
-                    "Failed to read the pokedex toml file `{:?}': {:?}",
-                    pokedex_toml_path, err
-                );
-                return Err(ErrorCode::I0);
-            }
-        };
-
-        match pokedex_toml.parse::<toml::Table>() {
-            Ok(toml) => Ok(toml),
-            Err(err) => {
-                error!(
-                    "Faile to parse the file `{:?}' into a toml table: {:?}",
-                    &pokedex_toml_path, err
-                );
-                Err(ErrorCode::I0)
-            }
-        }
+        Toml::get_toml(&pokedex_toml_path)
     }
 
     fn new() -> Result<Self, ErrorCode> {

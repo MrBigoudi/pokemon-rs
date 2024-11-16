@@ -47,14 +47,15 @@ if [[ "${RUN_WASM_PACK}" == "true" ]]; then
 fi
 
 # Start a Python HTTP server in the background
-echo "Starting Python HTTP server on port 8080..."
-python3 -m http.server 8080 &
+PORT=8080
+echo "Starting Python HTTP server on port ${PORT}..."
+python3 server.py $PORT&
 SERVER_PID=$!
 echo "Python server started with PID ${SERVER_PID}"
 
 # Open index.html in Firefox
 echo "Opening index.html in Firefox..."
-firefox http://localhost:8080/index.html &
+firefox http://localhost:${PORT}/index.html &
 
 # Get the PID of the last background command (Firefox)
 FIREFOX_PID=$!

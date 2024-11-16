@@ -1,5 +1,6 @@
 #[derive(Debug)]
 pub enum ErrorCode {
-    I0,
+    IO,
     Unknown,
+    Network,
 }

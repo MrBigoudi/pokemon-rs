@@ -1,6 +1,8 @@
 use std::{path::PathBuf, sync::{Arc, Mutex}};
 
+#[cfg(not(target_arch = "wasm32"))]
 use location_macros::workspace_dir;
+
 use log::{error, warn};
 use winit::{dpi::PhysicalSize, window::Window};
 
@@ -166,7 +168,11 @@ impl State {
 
     fn init_render_pipeline(device: &wgpu::Device, config: &Mutex<wgpu::SurfaceConfiguration>) -> Result<wgpu::RenderPipeline, ErrorCode> {
         // Create the shader
+        #[cfg(not(target_arch = "wasm32"))]
         let mut shader_path = PathBuf::from(workspace_dir!());
+
+        #[cfg(target_arch = "wasm32")]
+        let mut shader_path = PathBuf::from("/");
         shader_path.push("shaders");
         shader_path.push("default");
         shader_path.set_extension("wgsl");

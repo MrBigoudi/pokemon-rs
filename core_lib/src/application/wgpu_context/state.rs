@@ -1,9 +1,12 @@
-use std::sync::{Arc, Mutex};
+use std::{path::PathBuf, sync::{Arc, Mutex}};
 
+use location_macros::workspace_dir;
 use log::{error, warn};
 use winit::{dpi::PhysicalSize, window::Window};
 
 use crate::application::{parameters::ApplicationParameters, utils::debug::ErrorCode};
+
+use super::shaders::Shader;
 
 pub struct State {
     pub size: Mutex<PhysicalSize<u32>>,
@@ -12,6 +15,8 @@ pub struct State {
     pub device: wgpu::Device,
     pub queue: wgpu::Queue,
     pub window: Arc<Window>,
+
+    pub render_pipeline: wgpu::RenderPipeline,
 }
 
 impl State {
@@ -159,6 +164,75 @@ impl State {
         }
     }
 
+    fn init_render_pipeline(device: &wgpu::Device, config: &Mutex<wgpu::SurfaceConfiguration>) -> Result<wgpu::RenderPipeline, ErrorCode> {
+        // Create the shader
+        let mut shader_path = PathBuf::from(workspace_dir!());
+        shader_path.push("shaders");
+        shader_path.push("default");
+        shader_path.set_extension("wgsl");
+
+        let shader = match Shader::get_shader_module("DefaultShader", &shader_path, device){
+            Ok(shader) => shader,
+            Err(err) => {
+                error!("Failed to create the render pipeline's shader module: {:?}", err);
+                return Err(ErrorCode::Wgpu);
+            }
+        };
+
+        // Create the pipeline layout
+        let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+            label: Some("DefaultPipelineLayout"),
+            bind_group_layouts: &[],
+            push_constant_ranges: &[],
+        });
+
+        // Create the pipeline
+        let format = config.lock().unwrap().format;
+
+        let pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor{
+            label: Some("DefaultPipeline"),
+            layout: Some(&pipeline_layout),
+            vertex: wgpu::VertexState {
+                module: &shader,
+                entry_point: Some("vs_main"),
+                buffers: &[], // Type of vertices passed to the vertex shader
+                compilation_options: wgpu::PipelineCompilationOptions::default(),
+            },
+            fragment: Some(wgpu::FragmentState{
+                module: &shader,
+                entry_point: Some("fs_main"),
+                targets: &[Some(wgpu::ColorTargetState{
+                    format,
+                    blend: Some(wgpu::BlendState::REPLACE),
+                    write_mask: wgpu::ColorWrites::ALL, // Write to all channels
+                })],
+                compilation_options: wgpu::PipelineCompilationOptions::default()
+            }),
+            primitive: wgpu::PrimitiveState {
+                topology: wgpu::PrimitiveTopology::TriangleList,
+                strip_index_format: None,
+                front_face: wgpu::FrontFace::Ccw,
+                cull_mode: Some(wgpu::Face::Back),
+                // Setting this to anything other than Fill requires Features::NON_FILL_POLYGON_MODE
+                polygon_mode: wgpu::PolygonMode::Fill,
+                // Requires Features::DEPTH_CLIP_CONTROL
+                unclipped_depth: false,
+                // Requires Features::CONSERVATIVE_RASTERIZATION
+                conservative: false,
+            },
+            depth_stencil: None,
+            multisample: wgpu::MultisampleState {
+                count: 1, // Number of samples
+                mask: !0, // Active samples (here all)
+                alpha_to_coverage_enabled: false,
+            },
+            multiview: None, // Number of array layers, (here not rendering to array textures)
+            cache: None, // Cache shader compilation data (Only useful for Android)
+        });
+
+        Ok(pipeline)
+    }
+
     pub async fn new(
         parameters: &ApplicationParameters,
         window: Arc<Window>,
@@ -170,6 +244,7 @@ impl State {
         let size = Self::init_size(parameters, Arc::clone(&window));
         let config = Mutex::new(Self::init_surface_config(&surface, &adapter, &size));
         let size = Mutex::new(size);
+        let render_pipeline = Self::init_render_pipeline(&device, &config)?;
 
         Ok(Self {
             size,
@@ -178,6 +253,7 @@ impl State {
             device,
             queue,
             window,
+            render_pipeline,
         })
     }
 }

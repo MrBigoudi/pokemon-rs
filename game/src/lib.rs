@@ -51,7 +51,7 @@ pub fn run() {
     }
 
     // TODO: Remove this test code
-    let _ = gameplay_lib::pokemon::pokedex::get_pokedex();
+    // let _ = gameplay_lib::pokemon::pokedex::get_pokedex();
 
     // Run the app
     let parameters = ApplicationParameters::default();

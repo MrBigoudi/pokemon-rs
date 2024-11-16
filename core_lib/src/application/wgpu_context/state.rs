@@ -4,9 +4,10 @@ use std::{path::PathBuf, sync::{Arc, Mutex}};
 use location_macros::workspace_dir;
 
 use log::{error, warn};
+use wgpu::util::DeviceExt;
 use winit::{dpi::PhysicalSize, window::Window};
 
-use crate::application::{parameters::ApplicationParameters, utils::debug::ErrorCode};
+use crate::{application::{parameters::ApplicationParameters, utils::debug::ErrorCode}, scene::geometry::vertex::Vertex};
 
 use super::shaders::Shader;
 
@@ -18,7 +19,10 @@ pub struct State {
     pub queue: wgpu::Queue,
     pub window: Arc<Window>,
 
+    // TODO: Update this
     pub render_pipeline: wgpu::RenderPipeline,
+    pub vertex_buffer: wgpu::Buffer,
+    pub index_buffer: wgpu::Buffer,
 }
 
 impl State {
@@ -201,7 +205,7 @@ impl State {
             vertex: wgpu::VertexState {
                 module: &shader,
                 entry_point: Some("vs_main"),
-                buffers: &[], // Type of vertices passed to the vertex shader
+                buffers: &[Vertex::layout()], // Type of vertices passed to the vertex shader
                 compilation_options: wgpu::PipelineCompilationOptions::default(),
             },
             fragment: Some(wgpu::FragmentState{
@@ -239,6 +243,25 @@ impl State {
         Ok(pipeline)
     }
 
+    fn init_vertex_buffer(device: &wgpu::Device) -> wgpu::Buffer {
+        let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor{
+            label: Some("TriangleVertexBuffer"),
+            contents: bytemuck::cast_slice(crate::scene::geometry::vertex::TRIANGLE_VERTICES),
+            usage: wgpu::BufferUsages::VERTEX,
+        });
+        vertex_buffer
+    }
+
+    fn init_index_buffer(device: &wgpu::Device) -> wgpu::Buffer {
+        let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor{
+            label: Some("TriangleIndexBuffer"),
+            contents: bytemuck::cast_slice(crate::scene::geometry::vertex::TRIANGLE_INDICES),
+            usage: wgpu::BufferUsages::INDEX,
+        });
+        vertex_buffer
+    }
+
+
     pub async fn new(
         parameters: &ApplicationParameters,
         window: Arc<Window>,
@@ -250,6 +273,9 @@ impl State {
         let size = Self::init_size(parameters, Arc::clone(&window));
         let config = Mutex::new(Self::init_surface_config(&surface, &adapter, &size));
         let size = Mutex::new(size);
+        
+        let vertex_buffer = Self::init_vertex_buffer(&device);
+        let index_buffer = Self::init_index_buffer(&device);
         let render_pipeline = Self::init_render_pipeline(&device, &config)?;
 
         Ok(Self {
@@ -260,6 +286,8 @@ impl State {
             queue,
             window,
             render_pipeline,
+            vertex_buffer,
+            index_buffer,
         })
     }
 }

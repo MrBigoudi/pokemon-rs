@@ -79,11 +79,12 @@ impl State {
 
             render_pass.set_pipeline(&self.render_pipeline);
 
+            render_pass.set_bind_group(0, &self.diffuse_bind_group, &[]);
             render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..)); // .. to use the entire buffer
             render_pass.set_index_buffer(self.index_buffer.slice(..), wgpu::IndexFormat::Uint16); // .. to use the entire buffer
 
-            let num_indices = crate::scene::geometry::vertex::TRIANGLE_INDICES.len() as u32;
-            render_pass.draw_indexed(0..num_indices, 0, 0..1); // 3 vertices, 1 instance
+            let num_indices = crate::scene::geometry::vertex::RECTANGLE_INDICES.len() as u32;
+            render_pass.draw_indexed(0..num_indices, 0, 0..1);
         }
 
         // Submit to the queue

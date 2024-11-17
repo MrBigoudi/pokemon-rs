@@ -19,12 +19,11 @@ impl Shader {
 
     #[cfg(not(target_arch = "wasm32"))]
     pub fn get_shader_module(
-        name: &str,
+        label: Option<&str>,
         path: &Path,
         device: &wgpu::Device,
     ) -> Result<wgpu::ShaderModule, ErrorCode> {
         let source = Self::get_source(path)?;
-        let label = Some(name);
         Ok(device.create_shader_module(wgpu::ShaderModuleDescriptor {
             label,
             source,
@@ -33,7 +32,7 @@ impl Shader {
 
     #[cfg(target_arch = "wasm32")]
     pub fn get_shader_module(
-        name: &str,
+        label: Option<&str>,
         url: &Path,
         device: &wgpu::Device,
     ) -> Result<wgpu::ShaderModule, ErrorCode> {
@@ -43,13 +42,12 @@ impl Shader {
             Err(err) => {
                 error!(
                     "Failed to fetch the shader `{}' at `{}': {:?}",
-                    name, url, err
+                    label, url, err
                 );
                 return Err(ErrorCode::Unknown);
             }
         };
 
-        let label = Some(name);
         Ok(device.create_shader_module(wgpu::ShaderModuleDescriptor {
             label,
             source: wgpu::ShaderSource::Wgsl(shader_code.into()),

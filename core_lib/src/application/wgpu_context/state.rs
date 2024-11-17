@@ -1,15 +1,11 @@
-use std::{path::PathBuf, sync::{Arc, Mutex}};
-
-#[cfg(not(target_arch = "wasm32"))]
-use location_macros::workspace_dir;
+use std::sync::{Arc, Mutex};
 
 use log::{error, warn};
 use wgpu::util::DeviceExt;
 use winit::{dpi::PhysicalSize, window::Window};
 
-use crate::{application::{parameters::ApplicationParameters, utils::debug::ErrorCode}, scene::{geometry::vertex::Vertex, rendering::texture}};
+use crate::application::{parameters::ApplicationParameters, utils::debug::ErrorCode};
 
-use super::shaders::Shader;
 
 pub struct State {
     pub size: Mutex<PhysicalSize<u32>>,
@@ -20,12 +16,8 @@ pub struct State {
     pub window: Arc<Window>,
 
     // TODO: Update this
-    pub render_pipeline: wgpu::RenderPipeline,
     pub vertex_buffer: wgpu::Buffer,
     pub index_buffer: wgpu::Buffer,
-
-    pub diffuse_bind_group: wgpu::BindGroup,
-    pub diffuse_texture: texture::Texture,
 }
 
 impl State {
@@ -173,79 +165,6 @@ impl State {
         }
     }
 
-    fn init_render_pipeline(device: &wgpu::Device, config: &Mutex<wgpu::SurfaceConfiguration>, diffuse_bind_group_layout: &wgpu::BindGroupLayout) -> Result<wgpu::RenderPipeline, ErrorCode> {
-        // Create the shader
-        #[cfg(not(target_arch = "wasm32"))]
-        let mut shader_path = PathBuf::from(workspace_dir!());
-
-        #[cfg(target_arch = "wasm32")]
-        let mut shader_path = PathBuf::from("/");
-        shader_path.push("shaders");
-        shader_path.push("default");
-        shader_path.set_extension("wgsl");
-
-        let shader = match Shader::get_shader_module("DefaultShader", &shader_path, device){
-            Ok(shader) => shader,
-            Err(err) => {
-                error!("Failed to create the render pipeline's shader module: {:?}", err);
-                return Err(ErrorCode::Wgpu);
-            }
-        };
-
-        // Create the pipeline layout
-        let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
-            label: Some("DefaultPipelineLayout"),
-            bind_group_layouts: &[diffuse_bind_group_layout],
-            push_constant_ranges: &[],
-        });
-
-        // Create the pipeline
-        let format = config.lock().unwrap().format;
-
-        let pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor{
-            label: Some("DefaultPipeline"),
-            layout: Some(&pipeline_layout),
-            vertex: wgpu::VertexState {
-                module: &shader,
-                entry_point: Some("vs_main"),
-                buffers: &[Vertex::layout()], // Type of vertices passed to the vertex shader
-                compilation_options: wgpu::PipelineCompilationOptions::default(),
-            },
-            fragment: Some(wgpu::FragmentState{
-                module: &shader,
-                entry_point: Some("fs_main"),
-                targets: &[Some(wgpu::ColorTargetState{
-                    format,
-                    blend: Some(wgpu::BlendState::ALPHA_BLENDING),
-                    write_mask: wgpu::ColorWrites::ALL, // Write to all channels
-                })],
-                compilation_options: wgpu::PipelineCompilationOptions::default()
-            }),
-            primitive: wgpu::PrimitiveState {
-                topology: wgpu::PrimitiveTopology::TriangleList,
-                strip_index_format: None,
-                front_face: wgpu::FrontFace::Ccw,
-                cull_mode: Some(wgpu::Face::Back),
-                // Setting this to anything other than Fill requires Features::NON_FILL_POLYGON_MODE
-                polygon_mode: wgpu::PolygonMode::Fill,
-                // Requires Features::DEPTH_CLIP_CONTROL
-                unclipped_depth: false,
-                // Requires Features::CONSERVATIVE_RASTERIZATION
-                conservative: false,
-            },
-            depth_stencil: None,
-            multisample: wgpu::MultisampleState {
-                count: 1, // Number of samples
-                mask: !0, // Active samples (here all)
-                alpha_to_coverage_enabled: false,
-            },
-            multiview: None, // Number of array layers, (here not rendering to array textures)
-            cache: None, // Cache shader compilation data (Only useful for Android)
-        });
-
-        Ok(pipeline)
-    }
-
     fn init_vertex_buffer(device: &wgpu::Device) -> wgpu::Buffer {
         let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor{
             label: Some("TriangleVertexBuffer"),
@@ -264,68 +183,6 @@ impl State {
         vertex_buffer
     }
 
-    fn init_diffuse_texture(device: &wgpu::Device, queue: &wgpu::Queue) -> Result<texture::Texture, ErrorCode> {
-        #[cfg(not(target_arch = "wasm32"))]
-        let mut texture_path = PathBuf::from(workspace_dir!());
-
-        #[cfg(target_arch = "wasm32")]
-        let mut texture_path = PathBuf::from("/");
-        texture_path.push("assets");
-        texture_path.push("sprites");
-        texture_path.push("pokemons");
-        texture_path.push("bulbasaur");
-        texture_path.push("front");
-        texture_path.set_extension("png");
-
-        texture::Texture::from_path(&texture_path, device, queue, None)
-    }
-
-    fn init_diffuse_bind_group(device: &wgpu::Device, texture: &texture::Texture) -> (wgpu::BindGroupLayout, wgpu::BindGroup) {
-        let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-            entries: &[
-                // Sampled texture
-                wgpu::BindGroupLayoutEntry {
-                    binding: 0,
-                    visibility: wgpu::ShaderStages::FRAGMENT,
-                    ty: wgpu::BindingType::Texture {
-                        multisampled: false,
-                        view_dimension: wgpu::TextureViewDimension::D2,
-                        sample_type: wgpu::TextureSampleType::Float { filterable: true },
-                    },
-                    count: None,
-                },
-                // Sampler
-                wgpu::BindGroupLayoutEntry {
-                    binding: 1,
-                    visibility: wgpu::ShaderStages::FRAGMENT,
-                    // This should match the filterable field of the
-                    // corresponding Texture entry above.
-                    ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
-                    count: None,
-                },
-            ],
-            label: Some("texture_bind_group_layout"),
-        });
-
-        let bind_group = device.create_bind_group(
-        &wgpu::BindGroupDescriptor {
-            layout: &bind_group_layout,
-            entries: &[
-                wgpu::BindGroupEntry {
-                    binding: 0,
-                    resource: wgpu::BindingResource::TextureView(&texture.view),
-                },
-                wgpu::BindGroupEntry {
-                    binding: 1,
-                    resource: wgpu::BindingResource::Sampler(&texture.sampler),
-                }
-            ],
-            label: Some("diffuse_bind_group"),
-        });
-
-        (bind_group_layout, bind_group)
-    }
-
     pub async fn new(
         parameters: &ApplicationParameters,
         window: Arc<Window>,
@@ -341,11 +198,6 @@ impl State {
         let vertex_buffer = Self::init_vertex_buffer(&device);
         let index_buffer = Self::init_index_buffer(&device);
 
-        let diffuse_texture = Self::init_diffuse_texture(&device, &queue)?;
-        let (diffuse_bind_group_layout, diffuse_bind_group) = Self::init_diffuse_bind_group(&device, &diffuse_texture);
-
-        let render_pipeline = Self::init_render_pipeline(&device, &config, &diffuse_bind_group_layout)?;
-
         Ok(Self {
             size,
             surface,
@@ -353,11 +205,8 @@ impl State {
             device,
             queue,
             window,
-            render_pipeline,
             vertex_buffer,
             index_buffer,
-            diffuse_texture,
-            diffuse_bind_group,
         })
     }
 }

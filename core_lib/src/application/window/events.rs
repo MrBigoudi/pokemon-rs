@@ -18,7 +18,7 @@ impl Application {
     }
 
     pub fn on_render(&mut self) -> Result<(), ErrorCode> {
-        if let Err(err) = self.wgpu_state.on_render() {
+        if let Err(err) = self.wgpu_state.on_render(&self.default_graphics_pipeline) {
             error!(
                 "Failed to handle a render event on the wgpu state: {:?}",
                 err

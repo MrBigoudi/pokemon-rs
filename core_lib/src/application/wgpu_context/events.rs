@@ -3,7 +3,7 @@ use winit::{dpi::PhysicalSize, event::WindowEvent};
 
 use crate::application::utils::{debug::ErrorCode, time::Duration};
 
-use super::state::State;
+use super::{pipelines::graphics::GraphicsPipeline, state::State};
 
 impl State {
     pub fn on_resize(&self, new_size: PhysicalSize<u32>) -> Result<(), ErrorCode> {
@@ -36,7 +36,7 @@ impl State {
         Ok(())
     }
 
-    pub fn on_render(&self) -> Result<(), ErrorCode> {
+    pub fn on_render(&self, default_graphics_pipeline: &super::pipelines::implementations::graphics_default::DefaultGraphicsPipeline) -> Result<(), ErrorCode> {
         let output = match self.surface.get_current_texture() {
             Ok(output) => output,
             Err(err) => {
@@ -57,7 +57,7 @@ impl State {
             .texture
             .create_view(&wgpu::TextureViewDescriptor::default());
         {
-            let _render_pass = command_encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+            let mut render_pass = command_encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                 label: Some("Render Pass"),
                 color_attachments: &[Some(wgpu::RenderPassColorAttachment {
                     view: &view,
@@ -76,6 +76,17 @@ impl State {
                 occlusion_query_set: None,
                 timestamp_writes: None,
             });
+
+            let render_pipeline = &default_graphics_pipeline.get_base().render_pipeline;
+            render_pass.set_pipeline(render_pipeline);
+
+            let bind_group_0 = &default_graphics_pipeline.get_base().bind_groups[0];
+            render_pass.set_bind_group(0, bind_group_0, &[]);
+            render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..)); // .. to use the entire buffer
+            render_pass.set_index_buffer(self.index_buffer.slice(..), wgpu::IndexFormat::Uint16); // .. to use the entire buffer
+
+            let num_indices = crate::scene::geometry::vertex::RECTANGLE_INDICES.len() as u32;
+            render_pass.draw_indexed(0..num_indices, 0, 0..1);
         }
 
         // Submit to the queue

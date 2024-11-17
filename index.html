@@ -19,7 +19,7 @@
 
 <body id="wasm">
   <script type="module">
-      import init from "./pkg/core_lib.js";
+      import init from "/game/pkg/game.js";
       init().then(() => {
           console.log("WASM Loaded");
       }).catch(console.error);

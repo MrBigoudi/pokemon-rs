@@ -7,6 +7,7 @@ use log::{error, info};
 use super::parameters::ApplicationParameters;
 use super::state::ApplicationState;
 use super::utils::time::{Duration, Instant};
+use super::wgpu_context::pipelines::implementations::graphics_default::DefaultGraphicsPipeline;
 use super::wgpu_context::state::State;
 use super::window::{
     init::WindowContext,
@@ -27,6 +28,8 @@ pub struct Application {
     pub keys: HashMap<Key, KeyState>,
     #[cfg(not(target_arch = "wasm32"))]
     pub mouse_position: winit::dpi::LogicalPosition<f64>,
+
+    pub default_graphics_pipeline: DefaultGraphicsPipeline,
 }
 
 impl Application {
@@ -96,6 +99,9 @@ impl Application {
             }
         }
 
+        // Init pipelines
+        let default_graphics_pipeline = DefaultGraphicsPipeline::new()?;
+
         Ok(Application {
             window,
             wgpu_state,
@@ -104,6 +110,7 @@ impl Application {
             keys: Default::default(),
             #[cfg(not(target_arch = "wasm32"))]
             mouse_position: Default::default(),
+            default_graphics_pipeline,
         })
     }
 

@@ -1,6 +1,6 @@
 #[derive(Debug)]
 pub enum ErrorCode {
-    I0,
+    IO,
     Wgpu,
     Winit,
     Web,
@@ -8,4 +8,5 @@ pub enum ErrorCode {
     SyncError,
     NotInitialized,
     AlreadyInitialized,
+    Network,
 }

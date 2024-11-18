@@ -31,7 +31,7 @@ impl Texture {
     }
 
     pub fn from_bytes(bytes: &[u8], device: &wgpu::Device, queue: &wgpu::Queue, label: Option<&str>) -> Result<Self, ErrorCode> {
-        let diffuse_image = match image::load_from_memory(&bytes){
+        let diffuse_image = match image::load_from_memory(bytes){
             Ok(image) => image,
             Err(err) => {
                 error!("Failed to load the texture from bytes: {:?}", err);

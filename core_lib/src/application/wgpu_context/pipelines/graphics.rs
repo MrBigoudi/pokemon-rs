@@ -2,7 +2,7 @@ use std::{path::Path, sync::Arc};
 
 use log::error;
 
-use crate::application::{global, utils::debug::ErrorCode, wgpu_context::{shaders::Shader, state::State}};
+use crate::{application::{utils::debug::ErrorCode, wgpu_context::{shaders::Shader, state::State}}, global, scene::Scene};
 
 use super::PipelineResources;
 
@@ -30,6 +30,16 @@ pub trait GraphicsPipeline {
         }
     }
 
+    fn get_global_scene() -> Result<Arc<Scene>, ErrorCode> {
+        match global::get_global_scene() {
+            Ok(scene) => Ok(scene),
+            Err(err) => {
+                error!("Failed to get the global scene when creating a graphics pipeline: {:?}", err);
+                Err(ErrorCode::Unknown)
+            }
+        }
+    }
+
     fn from_multiple_shader_paths(
         vertex_shader_path: &Path, 
         fragment_shader_path: &Path,
@@ -38,7 +48,7 @@ pub trait GraphicsPipeline {
     ) -> Result<(Self::Resources, GraphicsPipelineBase), ErrorCode> {
         let global_wgpu_state = Self::get_global_wgpu_state()?;
 
-        let vertex_module = match Shader::get_shader_module(vertex_label, &vertex_shader_path, &global_wgpu_state.device){
+        let vertex_module = match Shader::get_shader_module(vertex_label, vertex_shader_path, &global_wgpu_state.device){
             Ok(shader) => shader,
             Err(err) => {
                 error!("Failed to create the render pipeline's vertex shader module `{:?}': {:?}", vertex_shader_path, err);
@@ -46,7 +56,7 @@ pub trait GraphicsPipeline {
             }
         };
 
-        let fragment_module = match Shader::get_shader_module(fragment_label, &fragment_shader_path, &global_wgpu_state.device){
+        let fragment_module = match Shader::get_shader_module(fragment_label, fragment_shader_path, &global_wgpu_state.device){
             Ok(shader) => shader,
             Err(err) => {
                 error!("Failed to create the render pipeline's fragment shader module `{:?}': {:?}", fragment_shader_path, err);
@@ -65,7 +75,7 @@ pub trait GraphicsPipeline {
     ) -> Result<(Self::Resources, GraphicsPipelineBase), ErrorCode> {
         let global_wgpu_state = Self::get_global_wgpu_state()?;
 
-        let shader_module = match Shader::get_shader_module(shader_label, &shader_path, &global_wgpu_state.device){
+        let shader_module = match Shader::get_shader_module(shader_label, shader_path, &global_wgpu_state.device){
             Ok(shader) => shader,
             Err(err) => {
                 error!("Failed to create the render pipeline's shader module `{:?}': {:?}", shader_path, err);
@@ -186,17 +196,17 @@ pub trait GraphicsPipeline {
     }
 
     fn init_resources() -> Result<Self::Resources, ErrorCode>;
-    fn init_bind_groups(resources: &Self::Resources, bind_groups_layouts: &Vec<wgpu::BindGroupLayout>) -> Result<Vec<wgpu::BindGroup>, ErrorCode>;
     fn init_bind_groups_layouts() -> Result<Vec<wgpu::BindGroupLayout>, ErrorCode>;
+    fn init_bind_groups(resources: &Self::Resources, bind_groups_layouts: &[wgpu::BindGroupLayout]) -> Result<Vec<wgpu::BindGroup>, ErrorCode>;
     fn init_render_pipeline_from_multiple_modules(
         vertex_shader_module: wgpu::ShaderModule, 
         fragment_shader_module: wgpu::ShaderModule,
-        bind_groups_layouts: &Vec<&wgpu::BindGroupLayout>,
+        bind_groups_layouts: &[&wgpu::BindGroupLayout],
     ) -> Result<wgpu::RenderPipeline, ErrorCode>;
     fn init_render_pipeline_from_single_module(
         shader_module: wgpu::ShaderModule, 
         vertex_entry_point: &str,
         fragment_entry_point: &str,
-        bind_groups_layouts: &Vec<&wgpu::BindGroupLayout>,
+        bind_groups_layouts: &[&wgpu::BindGroupLayout],
     ) -> Result<wgpu::RenderPipeline, ErrorCode>;
 }

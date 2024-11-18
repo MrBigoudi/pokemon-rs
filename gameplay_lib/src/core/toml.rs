@@ -9,7 +9,7 @@ pub struct Toml;
 impl Toml {
     #[cfg(not(target_arch = "wasm32"))]
     pub fn get_toml(path: &Path) -> Result<toml::Table, ErrorCode> {
-        let toml_content = match std::fs::read_to_string(&path) {
+        let toml_content = match std::fs::read_to_string(path) {
             Ok(content) => content,
             Err(err) => {
                 error!(

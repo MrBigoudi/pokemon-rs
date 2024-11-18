@@ -36,7 +36,7 @@ impl State {
         Ok(())
     }
 
-    pub fn on_render(&self, default_graphics_pipeline: &super::pipelines::implementations::graphics_default::DefaultGraphicsPipeline) -> Result<(), ErrorCode> {
+    pub fn on_render(&self, default_graphics_pipeline: &crate::scene::rendering::graphics_pipelines::graphics_default::DefaultGraphicsPipeline) -> Result<(), ErrorCode> {
         let output = match self.surface.get_current_texture() {
             Ok(output) => output,
             Err(err) => {
@@ -80,8 +80,15 @@ impl State {
             let render_pipeline = &default_graphics_pipeline.get_base().render_pipeline;
             render_pass.set_pipeline(render_pipeline);
 
+            // Diffuse texture bind group
             let bind_group_0 = &default_graphics_pipeline.get_base().bind_groups[0];
             render_pass.set_bind_group(0, bind_group_0, &[]);
+
+            // Camera UBO bind group
+            let bind_group_1 = &default_graphics_pipeline.get_base().bind_groups[1];
+            render_pass.set_bind_group(1, bind_group_1, &[]);
+
+            // Send vertices and indices
             render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..)); // .. to use the entire buffer
             render_pass.set_index_buffer(self.index_buffer.slice(..), wgpu::IndexFormat::Uint16); // .. to use the entire buffer
 

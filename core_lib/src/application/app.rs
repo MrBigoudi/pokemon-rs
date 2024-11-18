@@ -1,13 +1,13 @@
 use std::{collections::HashMap, sync::Arc};
 
-use crate::application::global::set_global_wgpu_state;
 use crate::application::utils::debug::ErrorCode;
+use crate::scene::rendering::graphics_pipelines::graphics_default::DefaultGraphicsPipeline;
+use crate::scene::Scene;
 use log::{error, info};
 
 use super::parameters::ApplicationParameters;
 use super::state::ApplicationState;
 use super::utils::time::{Duration, Instant};
-use super::wgpu_context::pipelines::implementations::graphics_default::DefaultGraphicsPipeline;
 use super::wgpu_context::state::State;
 use super::window::{
     init::WindowContext,
@@ -30,6 +30,8 @@ pub struct Application {
     pub mouse_position: winit::dpi::LogicalPosition<f64>,
 
     pub default_graphics_pipeline: DefaultGraphicsPipeline,
+
+    pub scene: Arc<Scene>,
 }
 
 impl Application {
@@ -58,7 +60,7 @@ impl Application {
             }
         };
         let wgpu_state = Arc::new(wgpu_state);
-        set_global_wgpu_state(wgpu_state.clone())?;
+        crate::global::set_global_wgpu_state(wgpu_state.clone())?;
 
         #[cfg(target_arch = "wasm32")]
         {
@@ -99,7 +101,15 @@ impl Application {
             }
         }
 
-        // Init pipelines
+        // Init the scene
+        info!("Initializing the scene..");
+        let width = wgpu_state.config.lock().unwrap().width as f32;
+        let height = wgpu_state.config.lock().unwrap().height as f32;
+        let scene = Arc::new(Scene::new(width, height));
+        crate::global::set_global_scene(scene.clone())?;
+
+        // Init the pipelines
+        info!("Initializing the pipelines...");
         let default_graphics_pipeline = DefaultGraphicsPipeline::new()?;
 
         Ok(Application {
@@ -111,6 +121,7 @@ impl Application {
             #[cfg(not(target_arch = "wasm32"))]
             mouse_position: Default::default(),
             default_graphics_pipeline,
+            scene,
         })
     }
 

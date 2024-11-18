@@ -36,6 +36,10 @@ impl Application {
             );
             return Err(ErrorCode::Wgpu);
         }
+        
+        if let Some(scene) = std::sync::Arc::get_mut(&mut self.scene){
+            scene.on_resize(new_size);
+        }
         Ok(())
     }
 

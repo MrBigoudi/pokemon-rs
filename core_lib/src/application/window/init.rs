@@ -1,4 +1,5 @@
 use cfg_if::cfg_if;
+use common_lib::debug::ErrorCode;
 use log::error;
 
 use winit::{
@@ -7,7 +8,7 @@ use winit::{
     window::{Window, WindowAttributes},
 };
 
-use crate::application::{parameters::ApplicationParameters, utils::debug::ErrorCode};
+use crate::application::parameters::ApplicationParameters;
 
 pub struct WindowContext;
 

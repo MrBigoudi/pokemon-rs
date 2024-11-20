@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+common_lib = { path = "../common_lib" }
 bytemuck = { version = "1.19.0", features = ["derive"] }
 cfg-if = "1.0.0"
 env_logger = "0.11.5"
@@ -21,12 +22,10 @@ features = ["png", "jpeg"]
 
 # Dependencies not for WASM
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-location-macros = "0.1.2"
 
 # Dependencies for WASM
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 console_error_panic_hook = "0.1.6"
-reqwest = "0.12.9"
 console_log = "1.0.0"
 wgpu = { version = "23.0.0", features = ["webgl"]}
 wasm-bindgen = "0.2.93"

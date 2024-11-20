@@ -5,15 +5,13 @@ pub mod experience_group;
 pub mod names;
 pub mod wild_attributes;
 
+use common_lib::{debug::ErrorCode, toml::Toml};
+
 use entry::PokedexEntry;
 
-#[cfg(not(target_arch = "wasm32"))]
-use location_macros::workspace_dir;
+use log::error;
 
-
-use std::{collections::HashMap, path::PathBuf, sync::OnceLock};
-
-use crate::core::{debug::ErrorCode, toml::Toml};
+use std::{collections::HashMap, path::PathBuf, sync::Arc};
 
 pub type Id = u16;
 
@@ -22,33 +20,28 @@ pub struct Pokedex {
     pub data: HashMap<Id, PokedexEntry>,
 }
 
-pub fn get_pokedex() -> &'static Pokedex {
-    static mut GLOBAL_POKEDEX: OnceLock<Pokedex> = OnceLock::new();
-    unsafe {
-        GLOBAL_POKEDEX.get_or_init(|| {
-            Pokedex::new().unwrap_or_else(|err| {
-                panic!("Failed to access the global pokedex: {:?}", err);
-            })
-        })
-    }
-}
-
 impl Pokedex {
-    fn get_toml() -> Result<toml::Table, ErrorCode> {
-        #[cfg(not(target_arch = "wasm32"))]
-        let mut pokedex_toml_path = PathBuf::from(workspace_dir!());
-        #[cfg(target_arch = "wasm32")]
-        let mut pokedex_toml_path = PathBuf::from("/");
+    async fn get_toml() -> Result<toml::Table, ErrorCode> {
+        let mut pokedex_toml_path = PathBuf::from("");
         pokedex_toml_path.push("assets");
         pokedex_toml_path.push("data");
         pokedex_toml_path.push("pokedex");
         pokedex_toml_path.set_extension("toml");
 
-        Toml::get_toml(&pokedex_toml_path)
+        Toml::get_toml(&pokedex_toml_path).await
     }
 
     fn new() -> Result<Self, ErrorCode> {
-        let toml = Self::get_toml()?;
+        let toml = match pollster::block_on(Self::get_toml()){
+            Ok(toml) => toml,
+            Err(err) => {
+                error!(
+                    "Failed to block on the Pokedex's toml: {:?}",
+                    err
+                );
+                return Err(ErrorCode::Unknown);
+            }
+        };
         let mut data: HashMap<Id, PokedexEntry> = Default::default();
 
         // 0001 - Bulbasaur
@@ -57,5 +50,25 @@ impl Pokedex {
         data.insert(bulbasaur_id, bulbasaur_entry);
 
         Ok(Self { data })
+    }
+}
+
+static mut GLOBAL_POKEDEX: Option<Arc<Pokedex>> = None;
+
+pub fn get_global_pokedex() -> Result<Arc<Pokedex>, ErrorCode> {
+    let state = unsafe { GLOBAL_POKEDEX.clone() };
+    match state {
+        Some(state) => Ok(state),
+        None => {
+            let pokedex = match Pokedex::new() {
+                Ok(pokedex) => pokedex,
+                Err(err) => {
+                    error!("Failed to initialize the global pokedex: {:?}", err);
+                    return Err(ErrorCode::Unknown);
+                }
+            };
+            unsafe { GLOBAL_POKEDEX = Some(Arc::new(pokedex)) };
+            get_global_pokedex()
+        }
     }
 }

@@ -2,6 +2,7 @@
 
 members = [
     "game",             # Main Binary
+    "common_lib",       # Common Library
     "core_lib",         # Core Library
     "gameplay_lib",     # Gameplay Library
 ]

@@ -1,11 +1,9 @@
 use std::path::Path;
 
+use common_lib::debug::ErrorCode;
 use log::error;
 
-use crate::{
-    core::debug::ErrorCode,
-    pokemon::{stats::Stats, types::Type},
-};
+use crate::pokemon::{stats::Stats, types::Type};
 
 use super::{
     breeding::BreedingAttributes, categories::Category, names::Name,
@@ -49,7 +47,8 @@ impl PokedexEntry {
 
         error!(
             "Failed to create the pokedex entry for pokemon #{}: `{}'",
-            format!("{:0>4}", pokemon_id), pokemon_name
+            format!("{:0>4}", pokemon_id),
+            pokemon_name
         );
         Err(ErrorCode::Unknown)
     }

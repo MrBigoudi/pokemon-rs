@@ -24,23 +24,67 @@ impl Vertex {
 }
 
 pub const TRIANGLE_VERTICES: &[Vertex] = &[
-    Vertex{position: glam::Vec3{x:0.,y:0.5,z:0.}, tex_coords: glam::Vec2{x:0.5,y:0.}},
-    Vertex{position: glam::Vec3{x:-0.5,y:-0.5,z:0.}, tex_coords: glam::Vec2{x:0.,y:1.}},
-    Vertex{position: glam::Vec3{x:0.5,y:-0.5,z:0.}, tex_coords: glam::Vec2{x:1.,y:1.}},
+    Vertex {
+        position: glam::Vec3 {
+            x: 0.,
+            y: 0.5,
+            z: 0.,
+        },
+        tex_coords: glam::Vec2 { x: 0.5, y: 0. },
+    },
+    Vertex {
+        position: glam::Vec3 {
+            x: -0.5,
+            y: -0.5,
+            z: 0.,
+        },
+        tex_coords: glam::Vec2 { x: 0., y: 1. },
+    },
+    Vertex {
+        position: glam::Vec3 {
+            x: 0.5,
+            y: -0.5,
+            z: 0.,
+        },
+        tex_coords: glam::Vec2 { x: 1., y: 1. },
+    },
 ];
 
-pub const TRIANGLE_INDICES: &[u16] = &[
-    0,1,2,
-];
+pub const TRIANGLE_INDICES: &[u16] = &[0, 1, 2];
 
 pub const RECTANGLE_VERTICES: &[Vertex] = &[
-    Vertex{position: glam::Vec3{x:-0.5,y:0.5,z:0.}, tex_coords: glam::Vec2{x:0.,y:0.}},
-    Vertex{position: glam::Vec3{x:-0.5,y:-0.5,z:0.}, tex_coords: glam::Vec2{x:0.,y:1.}},
-    Vertex{position: glam::Vec3{x:0.5,y:0.5,z:0.}, tex_coords: glam::Vec2{x:1.,y:0.}},
-    Vertex{position: glam::Vec3{x:0.5,y:-0.5,z:0.}, tex_coords: glam::Vec2{x:1.,y:1.}},
+    Vertex {
+        position: glam::Vec3 {
+            x: -0.5,
+            y: 0.5,
+            z: 0.,
+        },
+        tex_coords: glam::Vec2 { x: 0., y: 0. },
+    },
+    Vertex {
+        position: glam::Vec3 {
+            x: -0.5,
+            y: -0.5,
+            z: 0.,
+        },
+        tex_coords: glam::Vec2 { x: 0., y: 1. },
+    },
+    Vertex {
+        position: glam::Vec3 {
+            x: 0.5,
+            y: 0.5,
+            z: 0.,
+        },
+        tex_coords: glam::Vec2 { x: 1., y: 0. },
+    },
+    Vertex {
+        position: glam::Vec3 {
+            x: 0.5,
+            y: -0.5,
+            z: 0.,
+        },
+        tex_coords: glam::Vec2 { x: 1., y: 1. },
+    },
 ];
 
-pub const RECTANGLE_INDICES: &[u16] = &[
-    0,1,2,
-    2,1,3,
-];
+pub const RECTANGLE_INDICES: &[u16] = &[0, 1, 2, 2, 1, 3];

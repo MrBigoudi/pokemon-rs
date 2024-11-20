@@ -1,7 +1,6 @@
+use common_lib::{debug::ErrorCode, time::Duration};
 use log::{error, warn};
 use winit::{dpi::PhysicalSize, event::WindowEvent};
-
-use crate::application::utils::{debug::ErrorCode, time::Duration};
 
 use super::{pipelines::graphics::GraphicsPipeline, state::State};
 
@@ -36,7 +35,10 @@ impl State {
         Ok(())
     }
 
-    pub fn on_render(&self, default_graphics_pipeline: &crate::scene::rendering::graphics_pipelines::graphics_default::DefaultGraphicsPipeline) -> Result<(), ErrorCode> {
+    pub fn on_render(
+        &self,
+        default_graphics_pipeline: &crate::scene::rendering::graphics_pipelines::graphics_default::DefaultGraphicsPipeline,
+    ) -> Result<(), ErrorCode> {
         let output = match self.surface.get_current_texture() {
             Ok(output) => output,
             Err(err) => {

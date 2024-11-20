@@ -2,5 +2,5 @@
 pub use wgpu::util::DeviceExt;
 
 pub mod application;
-pub mod scene;
 pub mod global;
+pub mod scene;

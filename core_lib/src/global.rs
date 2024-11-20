@@ -1,21 +1,23 @@
-use std::sync::{Arc, Once};
+use std::sync::Arc;
 
+use common_lib::debug::ErrorCode;
 use log::error;
 
-use crate::{application::{utils::debug::ErrorCode, wgpu_context::state::State}, scene::Scene};
+use crate::{application::wgpu_context::state::State, scene::Scene};
 
-static INIT_WGPU_STATE: Once = Once::new();
 static mut GLOBAL_WGPU_STATE: Option<Arc<State>> = None;
 
 pub fn set_global_wgpu_state(state: Arc<State>) -> Result<(), ErrorCode> {
-    if unsafe { GLOBAL_WGPU_STATE.is_some() } {
-        error!("Failed to set the global wgpu state; it is already set");
-        return Err(ErrorCode::AlreadyInitialized);
+    match unsafe { GLOBAL_WGPU_STATE.clone() } {
+        Some(_) => {
+            error!("Failed to set the global wgpu state; it is already set");
+            Err(ErrorCode::AlreadyInitialized)
+        }
+        None => {
+            unsafe { GLOBAL_WGPU_STATE = Some(state) };
+            Ok(())
+        }
     }
-    INIT_WGPU_STATE.call_once(|| {
-        unsafe { GLOBAL_WGPU_STATE = Some(state) };
-    });
-    Ok(())
 }
 
 pub fn get_global_wgpu_state() -> Result<Arc<State>, ErrorCode> {
@@ -29,17 +31,15 @@ pub fn get_global_wgpu_state() -> Result<Arc<State>, ErrorCode> {
     }
 }
 
-
 static mut GLOBAL_SCENE: Option<Arc<Scene>> = None;
 
 pub fn set_global_scene(scene: Arc<Scene>) -> Result<(), ErrorCode> {
-    unsafe {GLOBAL_SCENE = Some(scene) };
+    unsafe { GLOBAL_SCENE = Some(scene) };
     Ok(())
 }
 
 pub fn get_global_scene() -> Result<Arc<Scene>, ErrorCode> {
-    let scene = unsafe { GLOBAL_SCENE.clone() };
-    match scene {
+    match unsafe { GLOBAL_SCENE.clone() } {
         Some(scene) => Ok(scene),
         None => {
             error!("Failed to get the global scene: it is not initialized");

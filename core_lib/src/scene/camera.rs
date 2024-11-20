@@ -6,7 +6,7 @@ pub enum ProjectionType {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct Camera{
+pub struct Camera {
     pub eye: glam::Vec3,
     pub target: glam::Vec3,
     pub up: glam::Vec3,
@@ -26,7 +26,7 @@ impl Camera {
         let z_near = 0.;
         let z_far = 100.;
 
-        let aspect_ratio = width / height; 
+        let aspect_ratio = width / height;
 
         Camera {
             eye,
@@ -44,19 +44,21 @@ impl Camera {
     }
 
     pub fn get_perspective(&self) -> glam::Mat4 {
-        glam::Mat4::perspective_rh(self.fov_y_radians, self.aspect_ratio, self.z_near, self.z_far)
+        glam::Mat4::perspective_rh(
+            self.fov_y_radians,
+            self.aspect_ratio,
+            self.z_near,
+            self.z_far,
+        )
     }
 
     pub fn to_camera_gpu(&self, projection_type: ProjectionType) -> CameraGPU {
         let view = self.get_view();
         let proj = match projection_type {
             ProjectionType::Perspective => self.get_perspective(),
-            ProjectionType::Orthographic => todo!("Implement orthographic projections")
+            ProjectionType::Orthographic => todo!("Implement orthographic projections"),
         };
-        CameraGPU { 
-            view, 
-            proj,
-        }
+        CameraGPU { view, proj }
     }
 }
 

@@ -1,11 +1,11 @@
 use std::sync::{Arc, Mutex};
 
+use common_lib::debug::ErrorCode;
 use log::{error, warn};
 use wgpu::util::DeviceExt;
 use winit::{dpi::PhysicalSize, window::Window};
 
-use crate::application::{parameters::ApplicationParameters, utils::debug::ErrorCode};
-
+use crate::application::parameters::ApplicationParameters;
 
 pub struct State {
     pub size: Mutex<PhysicalSize<u32>>,
@@ -166,7 +166,7 @@ impl State {
     }
 
     fn init_vertex_buffer(device: &wgpu::Device) -> wgpu::Buffer {
-        let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor{
+        let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("TriangleVertexBuffer"),
             contents: bytemuck::cast_slice(crate::scene::geometry::vertex::RECTANGLE_VERTICES),
             usage: wgpu::BufferUsages::VERTEX,
@@ -175,7 +175,7 @@ impl State {
     }
 
     fn init_index_buffer(device: &wgpu::Device) -> wgpu::Buffer {
-        let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor{
+        let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("TriangleIndexBuffer"),
             contents: bytemuck::cast_slice(crate::scene::geometry::vertex::RECTANGLE_INDICES),
             usage: wgpu::BufferUsages::INDEX,
@@ -194,7 +194,7 @@ impl State {
         let size = Self::init_size(parameters, Arc::clone(&window));
         let config = Mutex::new(Self::init_surface_config(&surface, &adapter, &size));
         let size = Mutex::new(size);
-        
+
         let vertex_buffer = Self::init_vertex_buffer(&device);
         let index_buffer = Self::init_index_buffer(&device);
 

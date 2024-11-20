@@ -1,9 +1,9 @@
 use camera::Camera;
 use winit::dpi::PhysicalSize;
 
+pub mod camera;
 pub mod geometry;
 pub mod rendering;
-pub mod camera;
 
 pub struct Scene {
     pub camera: Camera,
@@ -12,7 +12,7 @@ pub struct Scene {
 impl Scene {
     pub fn new(width: f32, height: f32) -> Self {
         Self {
-            camera: Camera::new(width, height)
+            camera: Camera::new(width, height),
         }
     }
 

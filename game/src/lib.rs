@@ -1,5 +1,4 @@
 use cfg_if::cfg_if;
-use core_lib::application::{app::Application, parameters::ApplicationParameters};
 
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
@@ -51,11 +50,12 @@ pub fn run() {
     }
 
     // TODO: Remove this test code
-    // let _ = gameplay_lib::pokemon::pokedex::get_pokedex();
+    let _ = gameplay_lib::pokemon::pokedex::get_global_pokedex();
+    panic!("pokedex");
 
-    // Run the app
-    let parameters = ApplicationParameters::default();
-    if let Err(err) = Application::run(parameters) {
-        panic!("Failed to run the application: {:?}", err);
-    }
+    // // Run the app
+    // let parameters = core_lib::application::parameters::ApplicationParameters::default();
+    // if let Err(err) = core_lib::application::app::Application::run(parameters) {
+    //     panic!("Failed to run the application: {:?}", err);
+    // }
 }

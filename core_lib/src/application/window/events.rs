@@ -1,3 +1,4 @@
+use common_lib::{debug::ErrorCode, time::Instant};
 use log::error;
 use winit::{
     dpi::PhysicalSize,
@@ -5,10 +6,7 @@ use winit::{
     keyboard::PhysicalKey,
 };
 
-use crate::application::{
-    app::Application,
-    utils::{debug::ErrorCode, time::Instant},
-};
+use crate::application::app::Application;
 
 use super::key_map::{Key, KeyState};
 
@@ -36,8 +34,8 @@ impl Application {
             );
             return Err(ErrorCode::Wgpu);
         }
-        
-        if let Some(scene) = std::sync::Arc::get_mut(&mut self.scene){
+
+        if let Some(scene) = std::sync::Arc::get_mut(&mut self.scene) {
             scene.on_resize(new_size);
         }
         Ok(())

@@ -1,2 +1,2 @@
-pub mod texture;
 pub mod graphics_pipelines;
+pub mod texture;

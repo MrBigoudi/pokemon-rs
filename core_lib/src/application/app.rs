@@ -1,13 +1,14 @@
 use std::{collections::HashMap, sync::Arc};
 
-use crate::application::utils::debug::ErrorCode;
 use crate::scene::rendering::graphics_pipelines::graphics_default::DefaultGraphicsPipeline;
 use crate::scene::Scene;
+
+use common_lib::debug::ErrorCode;
+use common_lib::time::{Duration, Instant};
 use log::{error, info};
 
 use super::parameters::ApplicationParameters;
 use super::state::ApplicationState;
-use super::utils::time::{Duration, Instant};
 use super::wgpu_context::state::State;
 use super::window::{
     init::WindowContext,
@@ -110,7 +111,16 @@ impl Application {
 
         // Init the pipelines
         info!("Initializing the pipelines...");
-        let default_graphics_pipeline = DefaultGraphicsPipeline::new()?;
+        let default_graphics_pipeline = match pollster::block_on(DefaultGraphicsPipeline::new()) {
+            Ok(pipeline) => pipeline,
+            Err(err) => {
+                error!(
+                    "Failed to initialize the application's default graphics pipeline: {:?}",
+                    err
+                );
+                return Err(ErrorCode::Unknown);
+            }
+        };
 
         Ok(Application {
             window,

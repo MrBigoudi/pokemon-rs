@@ -1,4 +1,4 @@
-pub mod graphics;
 pub mod compute;
+pub mod graphics;
 
-pub trait PipelineResources{}
+pub trait PipelineResources {}

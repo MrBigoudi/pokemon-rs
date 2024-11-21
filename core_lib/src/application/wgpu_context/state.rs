@@ -7,6 +7,7 @@ use winit::{dpi::PhysicalSize, window::Window};
 
 use crate::application::parameters::ApplicationParameters;
 
+#[derive(Debug)]
 pub struct State {
     pub size: Mutex<PhysicalSize<u32>>,
     pub surface: wgpu::Surface<'static>,

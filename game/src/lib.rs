@@ -38,7 +38,7 @@ fn init_env_logger() {
 }
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen(start))]
-pub fn run() {
+pub async fn run() {
     // Init the logger
     cfg_if! {
         if #[cfg(target_arch = "wasm32")] {
@@ -49,13 +49,13 @@ pub fn run() {
         }
     }
 
-    // TODO: Remove this test code
-    let _ = gameplay_lib::pokemon::pokedex::get_global_pokedex();
-    panic!("pokedex");
+    // // TODO: Remove this test code
+    // let _ = gameplay_lib::pokemon::pokedex::get_global_pokedex().await;
+    // panic!("pokedex");
 
-    // // Run the app
-    // let parameters = core_lib::application::parameters::ApplicationParameters::default();
-    // if let Err(err) = core_lib::application::app::Application::run(parameters) {
-    //     panic!("Failed to run the application: {:?}", err);
-    // }
+    // Run the app
+    let parameters = core_lib::application::parameters::ApplicationParameters::default();
+    if let Err(err) = core_lib::application::app::Application::run(parameters) {
+        panic!("Failed to run the application: {:?}", err);
+    }
 }

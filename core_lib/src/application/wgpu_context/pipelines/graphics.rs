@@ -11,6 +11,7 @@ use crate::{
 
 use super::PipelineResources;
 
+#[derive(Debug)]
 pub struct GraphicsPipelineBase {
     pub render_pipeline: wgpu::RenderPipeline,
     pub bind_groups: Vec<wgpu::BindGroup>,
@@ -60,11 +61,13 @@ pub trait GraphicsPipeline {
     ) -> Result<(Self::Resources, GraphicsPipelineBase), ErrorCode> {
         let global_wgpu_state = Self::get_global_wgpu_state()?;
 
-        let vertex_module = match Shader::get_shader_module (
+        let vertex_module = match Shader::get_shader_module(
             vertex_label,
             vertex_shader_path,
             &global_wgpu_state.device,
-        ).await {
+        )
+        .await
+        {
             Ok(shader) => shader,
             Err(err) => {
                 error!(
@@ -75,11 +78,13 @@ pub trait GraphicsPipeline {
             }
         };
 
-        let fragment_module = match Shader::get_shader_module (
+        let fragment_module = match Shader::get_shader_module(
             fragment_label,
             fragment_shader_path,
             &global_wgpu_state.device,
-        ).await {
+        )
+        .await
+        {
             Ok(shader) => shader,
             Err(err) => {
                 error!(
@@ -103,7 +108,9 @@ pub trait GraphicsPipeline {
         let global_wgpu_state = Self::get_global_wgpu_state()?;
 
         let shader_module =
-            match Shader::get_shader_module(shader_label, shader_path, &global_wgpu_state.device).await {
+            match Shader::get_shader_module(shader_label, shader_path, &global_wgpu_state.device)
+                .await
+            {
                 Ok(shader) => shader,
                 Err(err) => {
                     error!(
@@ -114,7 +121,8 @@ pub trait GraphicsPipeline {
                 }
             };
 
-        Self::from_single_shader_module(shader_module, vertex_entry_point, fragment_entry_point).await
+        Self::from_single_shader_module(shader_module, vertex_entry_point, fragment_entry_point)
+            .await
     }
 
     #[allow(async_fn_in_trait)]

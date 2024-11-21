@@ -4,6 +4,7 @@ use common_lib::debug::ErrorCode;
 use image::GenericImageView;
 use log::error;
 
+#[derive(Debug)]
 pub struct Texture {
     pub texture: wgpu::Texture,
     pub view: wgpu::TextureView,

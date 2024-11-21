@@ -12,6 +12,7 @@ use crate::{
     scene::{camera::ProjectionType, geometry::vertex::Vertex, rendering::texture},
 };
 
+#[derive(Debug)]
 pub struct DefaultGraphicsPipelineResources {
     pub diffuse_texture: texture::Texture,
     pub camera_buffer: wgpu::Buffer,
@@ -20,6 +21,7 @@ pub struct DefaultGraphicsPipelineResources {
 impl PipelineResources for DefaultGraphicsPipelineResources {}
 
 #[non_exhaustive]
+#[derive(Debug)]
 pub struct DefaultGraphicsPipeline {
     pub base: GraphicsPipelineBase,
     pub resources: DefaultGraphicsPipelineResources,

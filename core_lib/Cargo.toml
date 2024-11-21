@@ -10,7 +10,6 @@ cfg-if = "1.0.0"
 env_logger = "0.11.5"
 glam = "0.29.2"
 log = "0.4.22"
-pollster = "0.4.0"
 take_mut = "0.2.2"
 wgpu = "23.0.0"
 winit = "0.30.5"
@@ -22,6 +21,7 @@ features = ["png", "jpeg"]
 
 # Dependencies not for WASM
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+pollster = "0.4.0"
 
 # Dependencies for WASM
 [target.'cfg(target_arch = "wasm32")'.dependencies]

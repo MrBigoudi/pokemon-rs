@@ -10,7 +10,7 @@ use std::time::Instant as StdInstant;
 pub type Duration = u64;
 
 /// A platform-independent replacement for `Instant`
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone)]
 pub struct Instant {
     #[cfg(not(target_arch = "wasm32"))]
     inner: StdInstant,

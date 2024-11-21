@@ -1,3 +1,3 @@
 fn main() {
-    game::run();
+    pollster::block_on(game::run());
 }

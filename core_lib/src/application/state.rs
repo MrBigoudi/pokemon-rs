@@ -14,16 +14,18 @@ pub enum ApplicationState {
 }
 
 impl ApplicationState {
-    fn init(&mut self, event_loop: &winit::event_loop::ActiveEventLoop) {
-        take_mut::take(self, |state| match state {
+    async fn init(&mut self, event_loop: &winit::event_loop::ActiveEventLoop) {
+        let new_app = match self {
+            ApplicationState::Uninitialized { parameters } => {
+                Application::new(event_loop, &parameters)
+                    .await
+                    .expect("Failed to initialize the application")
+            },
             ApplicationState::Initialized(_) => {
-                panic!("Failed to initialize the application state")
+                panic!("Failed to initialize the application state");
             }
-            ApplicationState::Uninitialized { parameters } => Self::Initialized(
-                Application::new(event_loop, parameters)
-                    .expect("Failed to initialize the application"),
-            ),
-        });
+        };
+        *self = ApplicationState::Initialized(new_app);
     }
 }
 
@@ -39,7 +41,11 @@ impl ApplicationHandler for ApplicationState {
 
     fn resumed(&mut self, event_loop: &ActiveEventLoop) {
         if let ApplicationState::Uninitialized { .. } = self {
-            self.init(event_loop)
+            #[cfg(target_arch = "wasm32")]
+            wasm_bindgen_futures::spawn_local(async{self.init(event_loop).await});
+
+            #[cfg(not(target_arch = "wasm32"))]
+            pollster::block_on(self.init(event_loop))
         }
     }
 

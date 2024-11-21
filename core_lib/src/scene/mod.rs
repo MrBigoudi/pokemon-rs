@@ -5,6 +5,7 @@ pub mod camera;
 pub mod geometry;
 pub mod rendering;
 
+#[derive(Debug)]
 pub struct Scene {
     pub camera: Camera,
 }

@@ -19,6 +19,7 @@ use winit::{
     window::Window,
 };
 
+#[derive(Debug)]
 pub struct Application {
     pub window: Arc<Window>,
     pub wgpu_state: Arc<State>,
@@ -36,9 +37,9 @@ pub struct Application {
 }
 
 impl Application {
-    pub fn new(
+    pub async fn new(
         event_loop: &ActiveEventLoop,
-        parameters: ApplicationParameters,
+        parameters: &ApplicationParameters,
     ) -> Result<Application, ErrorCode> {
         info!("Initializing the window...");
         let window = match WindowContext::init(&parameters, event_loop) {
@@ -50,7 +51,7 @@ impl Application {
         };
 
         info!("Initializing the wgpu state...");
-        let wgpu_state = match pollster::block_on(State::new(&parameters, window.clone())) {
+        let wgpu_state = match State::new(&parameters, window.clone()).await {
             Ok(state) => state,
             Err(err) => {
                 error!(
@@ -111,7 +112,7 @@ impl Application {
 
         // Init the pipelines
         info!("Initializing the pipelines...");
-        let default_graphics_pipeline = match pollster::block_on(DefaultGraphicsPipeline::new()) {
+        let default_graphics_pipeline = match DefaultGraphicsPipeline::new().await {
             Ok(pipeline) => pipeline,
             Err(err) => {
                 error!(

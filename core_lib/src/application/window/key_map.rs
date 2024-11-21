@@ -2,7 +2,7 @@ use log::warn;
 
 use winit::{event::ElementState, keyboard::KeyCode};
 
-#[derive(PartialEq, Eq, Default, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Default, Clone, Copy)]
 pub enum KeyState {
     Pressed,
     #[default]
@@ -18,7 +18,7 @@ impl KeyState {
     }
 }
 
-#[derive(PartialEq, Eq, Hash, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 pub enum Key {
     A,
     B,

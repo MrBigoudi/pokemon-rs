@@ -17,7 +17,6 @@ location-macros = "0.1.2"
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 futures = { version = "0.3.31", features = ["async-await"] }
 reqwest = "0.12.9"
-pollster = "0.4.0"
 console_error_panic_hook = "0.1.6"
 console_log = "1.0.0"
 wgpu = { version = "23.0.0", features = ["webgl"]}

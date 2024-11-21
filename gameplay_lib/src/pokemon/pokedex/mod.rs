@@ -31,14 +31,11 @@ impl Pokedex {
         Toml::get_toml(&pokedex_toml_path).await
     }
 
-    fn new() -> Result<Self, ErrorCode> {
-        let toml = match pollster::block_on(Self::get_toml()){
+    async fn new() -> Result<Self, ErrorCode> {
+        let toml = match Self::get_toml().await {
             Ok(toml) => toml,
             Err(err) => {
-                error!(
-                    "Failed to block on the Pokedex's toml: {:?}",
-                    err
-                );
+                error!("Failed to block on the Pokedex's toml: {:?}", err);
                 return Err(ErrorCode::Unknown);
             }
         };
@@ -55,12 +52,12 @@ impl Pokedex {
 
 static mut GLOBAL_POKEDEX: Option<Arc<Pokedex>> = None;
 
-pub fn get_global_pokedex() -> Result<Arc<Pokedex>, ErrorCode> {
+pub async fn get_global_pokedex() -> Result<Arc<Pokedex>, ErrorCode> {
     let state = unsafe { GLOBAL_POKEDEX.clone() };
     match state {
         Some(state) => Ok(state),
         None => {
-            let pokedex = match Pokedex::new() {
+            let pokedex = match Pokedex::new().await {
                 Ok(pokedex) => pokedex,
                 Err(err) => {
                     error!("Failed to initialize the global pokedex: {:?}", err);
@@ -68,7 +65,7 @@ pub fn get_global_pokedex() -> Result<Arc<Pokedex>, ErrorCode> {
                 }
             };
             unsafe { GLOBAL_POKEDEX = Some(Arc::new(pokedex)) };
-            get_global_pokedex()
+            Ok(unsafe { GLOBAL_POKEDEX.clone().unwrap() })
         }
     }
 }

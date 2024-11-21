@@ -1,5 +1,4 @@
 use camera::Camera;
-use winit::dpi::PhysicalSize;
 
 pub mod camera;
 pub mod geometry;
@@ -16,7 +15,7 @@ impl Scene {
         }
     }
 
-    pub fn on_resize(&mut self, new_size: PhysicalSize<u32>) {
-        self.camera.aspect_ratio = new_size.width as f32 / new_size.height as f32;
+    pub fn on_resize(&mut self, new_width: f32, new_height: f32) {
+        self.camera.aspect_ratio = new_width / new_height;
     }
 }

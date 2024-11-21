@@ -3,11 +3,7 @@ use std::{path::Path, sync::Arc};
 use common_lib::debug::ErrorCode;
 use log::error;
 
-use crate::{
-    application::wgpu_context::{shaders::Shader, state::State},
-    global,
-    scene::Scene,
-};
+use crate::wgpu_context::{shaders::Shader, state::State, global};
 
 use super::PipelineResources;
 
@@ -31,19 +27,6 @@ pub trait GraphicsPipeline {
             Err(err) => {
                 error!(
                     "Failed to get the global wgpu state when creating a graphics pipeline: {:?}",
-                    err
-                );
-                Err(ErrorCode::Unknown)
-            }
-        }
-    }
-
-    fn get_global_scene() -> Result<Arc<Scene>, ErrorCode> {
-        match global::get_global_scene() {
-            Ok(scene) => Ok(scene),
-            Err(err) => {
-                error!(
-                    "Failed to get the global scene when creating a graphics pipeline: {:?}",
                     err
                 );
                 Err(ErrorCode::Unknown)

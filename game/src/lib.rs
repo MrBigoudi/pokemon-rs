@@ -1,3 +1,5 @@
+pub mod application;
+
 use cfg_if::cfg_if;
 
 #[cfg(target_arch = "wasm32")]
@@ -49,13 +51,13 @@ pub fn run() {
         }
     }
 
-    // TODO: Remove this test code
-    let _ = gameplay_lib::pokemon::pokedex::get_global_pokedex();
-    panic!("pokedex");
+    // // TODO: Remove this test code
+    // let _ = gameplay_lib::pokemon::pokedex::get_global_pokedex();
+    // panic!("pokedex");
 
-    // // Run the app
-    // let parameters = core_lib::application::parameters::ApplicationParameters::default();
-    // if let Err(err) = core_lib::application::app::Application::run(parameters) {
-    //     panic!("Failed to run the application: {:?}", err);
-    // }
+    // Run the app
+    let parameters = common_lib::parameters::ApplicationParameters::default();
+    if let Err(err) = application::app::Application::run(parameters) {
+        panic!("Failed to run the application: {:?}", err);
+    }
 }

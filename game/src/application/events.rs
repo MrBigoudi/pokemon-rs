@@ -1,4 +1,5 @@
 use common_lib::{debug::ErrorCode, time::Instant};
+use core_lib::window::key_map::{Key, KeyState};
 use log::error;
 use winit::{
     dpi::PhysicalSize,
@@ -8,7 +9,6 @@ use winit::{
 
 use crate::application::app::Application;
 
-use super::key_map::{Key, KeyState};
 
 impl Application {
     pub fn on_exit(&mut self) -> Result<(), ErrorCode> {
@@ -16,13 +16,21 @@ impl Application {
     }
 
     pub fn on_render(&mut self) -> Result<(), ErrorCode> {
-        if let Err(err) = self.wgpu_state.on_render(&self.default_graphics_pipeline) {
-            error!(
-                "Failed to handle a render event on the wgpu state: {:?}",
-                err
-            );
-            return Err(ErrorCode::Wgpu);
-        }
+        let mut new_frame = match self.wgpu_state.on_begin_render() {
+            Ok(frame) => frame,
+            Err(err) => {
+                error!(
+                    "Failed to initialize the reder pass on the wgpu state: {:?}",
+                    err
+                );
+                return Err(ErrorCode::Wgpu);
+            },
+        };
+
+        // TODO: add state render functions
+        self.wgpu_state.on_render(&mut new_frame, &self.default_graphics_pipeline);
+
+        self.wgpu_state.on_end_render(new_frame);
         Ok(())
     }
 
@@ -35,9 +43,6 @@ impl Application {
             return Err(ErrorCode::Wgpu);
         }
 
-        if let Some(scene) = std::sync::Arc::get_mut(&mut self.scene) {
-            scene.on_resize(new_size);
-        }
         Ok(())
     }
 

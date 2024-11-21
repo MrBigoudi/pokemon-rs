@@ -1,4 +1,4 @@
-use common_lib::{debug::ErrorCode, time::Duration};
+use common_lib::{debug::ErrorCode, frame::FrameData, time::Duration};
 use log::{error, warn};
 use winit::{dpi::PhysicalSize, event::WindowEvent};
 
@@ -35,11 +35,11 @@ impl State {
         Ok(())
     }
 
-    pub fn on_render(
-        &self,
-        default_graphics_pipeline: &crate::scene::rendering::graphics_pipelines::graphics_default::DefaultGraphicsPipeline,
-    ) -> Result<(), ErrorCode> {
-        let output = match self.surface.get_current_texture() {
+    /// Run at the begining of the rendering
+    /// Initialize the framebuffer and the cammand buffer
+    pub fn on_begin_render(&self) -> Result<FrameData, ErrorCode> {
+        // Create a framebuffer
+        let frame_buffer = match self.surface.get_current_texture() {
             Ok(output) => output,
             Err(err) => {
                 error!("Failed to get the current surface texture: {:?}", err);
@@ -48,17 +48,42 @@ impl State {
         };
 
         // Create a command buffer
-        let mut command_encoder =
-            self.device
-                .create_command_encoder(&wgpu::CommandEncoderDescriptor {
-                    label: Some("Render Command Encoder"),
-                });
+        let command_buffer = self.device
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                label: Some("Render Command Encoder"),
+                }
+            )
+        ;
+
+        Ok(FrameData {
+            frame_buffer,
+            command_buffer,
+        })
+    }
+
+
+    /// Run at the end of the rendering
+    /// Present the framebuffer to the sceen
+    pub fn on_end_render(&self, frame_data: FrameData) {
+        // Submit to the queue
+        self.queue.submit(std::iter::once(frame_data.command_buffer.finish()));
+        // Present to the screen
+        frame_data.frame_buffer.present();
+    }
+
+    pub fn on_render(
+        &self,
+        frame_data: &mut FrameData,
+        default_graphics_pipeline: &crate::scene::rendering::graphics_pipelines::graphics_default::DefaultGraphicsPipeline,
+    ) {
+        let output = &frame_data.frame_buffer;
 
         // Create a render pass
         let view = output
             .texture
             .create_view(&wgpu::TextureViewDescriptor::default());
         {
+            let command_encoder = &mut frame_data.command_buffer;
             let mut render_pass = command_encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                 label: Some("Render Pass"),
                 color_attachments: &[Some(wgpu::RenderPassColorAttachment {
@@ -96,12 +121,6 @@ impl State {
 
             let num_indices = crate::scene::geometry::vertex::RECTANGLE_INDICES.len() as u32;
             render_pass.draw_indexed(0..num_indices, 0, 0..1);
-        }
-
-        // Submit to the queue
-        self.queue.submit(std::iter::once(command_encoder.finish()));
-        output.present();
-
-        Ok(())
+        };
     }
 }

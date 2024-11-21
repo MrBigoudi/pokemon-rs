@@ -1,11 +1,9 @@
 use std::sync::{Arc, Mutex};
 
-use common_lib::debug::ErrorCode;
+use common_lib::{debug::ErrorCode, parameters::ApplicationParameters};
 use log::{error, warn};
 use wgpu::util::DeviceExt;
 use winit::{dpi::PhysicalSize, window::Window};
-
-use crate::application::parameters::ApplicationParameters;
 
 pub struct State {
     pub size: Mutex<PhysicalSize<u32>>,

@@ -1,16 +1,13 @@
 use std::{collections::HashMap, sync::Arc};
 
-use crate::scene::rendering::graphics_pipelines::graphics_default::DefaultGraphicsPipeline;
-use crate::scene::Scene;
-
 use common_lib::debug::ErrorCode;
 use common_lib::time::{Duration, Instant};
 use log::{error, info};
 
-use super::parameters::ApplicationParameters;
-use super::state::ApplicationState;
-use super::wgpu_context::state::State;
-use super::window::{
+use common_lib::parameters::ApplicationParameters;
+
+use core_lib::wgpu_context::state::State;
+use core_lib::window::{
     init::WindowContext,
     key_map::{Key, KeyState},
 };
@@ -18,6 +15,8 @@ use winit::{
     event_loop::{ActiveEventLoop, ControlFlow, EventLoop},
     window::Window,
 };
+
+use crate::application::state::ApplicationState;
 
 pub struct Application {
     pub window: Arc<Window>,
@@ -30,9 +29,7 @@ pub struct Application {
     #[cfg(not(target_arch = "wasm32"))]
     pub mouse_position: winit::dpi::LogicalPosition<f64>,
 
-    pub default_graphics_pipeline: DefaultGraphicsPipeline,
-
-    pub scene: Arc<Scene>,
+    pub default_graphics_pipeline: core_lib::scene::rendering::graphics_pipelines::graphics_default::DefaultGraphicsPipeline,
 }
 
 impl Application {
@@ -61,7 +58,7 @@ impl Application {
             }
         };
         let wgpu_state = Arc::new(wgpu_state);
-        crate::global::set_global_wgpu_state(wgpu_state.clone())?;
+        core_lib::wgpu_context::global::set_global_wgpu_state(wgpu_state.clone())?;
 
         #[cfg(target_arch = "wasm32")]
         {
@@ -102,16 +99,12 @@ impl Application {
             }
         }
 
-        // Init the scene
-        info!("Initializing the scene..");
-        let width = wgpu_state.config.lock().unwrap().width as f32;
-        let height = wgpu_state.config.lock().unwrap().height as f32;
-        let scene = Arc::new(Scene::new(width, height));
-        crate::global::set_global_scene(scene.clone())?;
-
+        // TODO: Remove this
         // Init the pipelines
         info!("Initializing the pipelines...");
-        let default_graphics_pipeline = match pollster::block_on(DefaultGraphicsPipeline::new()) {
+        let default_graphics_pipeline = match pollster::block_on(
+            core_lib::scene::rendering::graphics_pipelines::graphics_default::DefaultGraphicsPipeline::new()
+        ) {
             Ok(pipeline) => pipeline,
             Err(err) => {
                 error!(
@@ -131,7 +124,6 @@ impl Application {
             #[cfg(not(target_arch = "wasm32"))]
             mouse_position: Default::default(),
             default_graphics_pipeline,
-            scene,
         })
     }
 

@@ -1,3 +1,4 @@
+use common_lib::parameters::ApplicationParameters;
 use log::warn;
 use winit::{
     application::ApplicationHandler,
@@ -6,7 +7,7 @@ use winit::{
     window::WindowId,
 };
 
-use super::{app::Application, parameters::ApplicationParameters};
+use super::app::Application;
 
 pub enum ApplicationState {
     Uninitialized { parameters: ApplicationParameters },

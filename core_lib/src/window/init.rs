@@ -7,8 +7,7 @@ use winit::{
     event_loop::ActiveEventLoop,
     window::{Window, WindowAttributes},
 };
-
-use crate::application::parameters::ApplicationParameters;
+use common_lib::parameters::ApplicationParameters;
 
 pub struct WindowContext;
 

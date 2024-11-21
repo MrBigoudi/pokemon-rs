@@ -1,0 +1,125 @@
+use std::collections::HashMap;
+
+use common_lib::{debug::ErrorCode, time::Duration};
+use log::error;
+
+use super::{concrete::empty::GameStateEmpty, state::{GameState, GameStateType}};
+
+pub struct GameStatesStack{
+    pub stack_of_indices: Vec<GameStateType>,
+    pub dict_of_states: HashMap<GameStateType, Box<dyn GameState>>, 
+}
+
+impl Default for GameStatesStack {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl GameStatesStack {
+    /// Initialize a game states stack with an empty state
+    fn new() -> Self {
+        let state = GameStateEmpty;
+        let stack_of_indices = vec![state.get_type()];
+        let mut dict_of_states: HashMap<GameStateType, Box<dyn GameState>> = HashMap::new();
+        dict_of_states.insert(state.get_type(), Box::new(state));
+
+        Self {
+            stack_of_indices,
+            dict_of_states,
+        }
+    }
+
+    /// Add a state to the state machine
+    /// Failes if a state of the same type has already been added
+    pub fn add(&mut self, state: Box<dyn GameState>) -> Result<(), ErrorCode> {
+        let state_type = state.get_type();
+        if self.dict_of_states.contains_key(&state_type) {
+            error!("Can't add twice the same type of state in the game state stack");
+            return Err(ErrorCode::Duplicate);
+        }
+
+        self.dict_of_states.insert(state_type, state);
+        Ok(())
+    }
+
+    /// Update the states after a change
+    fn on_change(&mut self, old_state_type: &GameStateType, new_state_type: &GameStateType) {
+        let old_state = self.dict_of_states.get_mut(old_state_type).unwrap();
+        old_state.on_exit();
+        let new_state = self.dict_of_states.get_mut(new_state_type).unwrap();
+        new_state.on_enter();
+    }
+
+    /// Push a wanted state to the state stack and update both the old and the current states
+    /// Failes if there are no such state in the state machine
+    pub fn push(&mut self, new_state_type: GameStateType) -> Result<(), ErrorCode> {
+        // Add the state
+        if !self.dict_of_states.contains_key(&new_state_type) {
+            error!("Can't stack a state which is not present in the state machine");
+            return Err(ErrorCode::NotInitialized);
+        }
+
+        let old_state_type = *self.stack_of_indices.last().unwrap();
+        self.stack_of_indices.push(new_state_type);
+
+        // Update the states
+        self.on_change(&old_state_type, &new_state_type);
+
+        Ok(())
+    }
+
+    /// Pop a state from the stack and update both the old and the current states
+    /// Failes if the stack is empty
+    pub fn pop(&mut self) -> Result<(), ErrorCode> {
+        match self.stack_of_indices.pop(){
+            Some(old_state_type) => {
+                let new_state_type = *self.stack_of_indices.last().unwrap();
+                self.on_change(&old_state_type, &new_state_type);
+                Ok(())
+            },
+            None => {
+                error!("Can't pop from an empty stack");
+                Err(ErrorCode::NotInitialized)
+            }
+        }
+    }
+
+
+    /// Get the state at the top of the stack
+    fn get_current_state(&mut self) -> &mut Box<dyn GameState> {
+        let current_state_type = self.stack_of_indices.last().unwrap();
+        self.dict_of_states.get_mut(current_state_type).unwrap()
+    }
+
+    
+    /// The update function runs every frame
+    pub fn on_update(&mut self, delta_time: Duration) {
+        let current_state = self.get_current_state();
+        current_state.as_mut().on_update(delta_time);        
+    }
+
+    /// The input handling function runs every frame
+    pub fn on_input(&mut self) {
+        let current_state = self.get_current_state();
+        current_state.as_mut().on_input();        
+    }
+
+    /// The resize function runs on all the states of the machine
+    pub fn on_resize(&mut self, new_width: f32, new_height: f32) {
+        for (_, state) in self.dict_of_states.iter_mut() {
+            state.on_resize(new_width, new_height);
+        }
+    }
+
+
+    /// The render function runs every frame
+    /// This function call the render function of all states in the stack in ascending order
+    pub fn on_render(&mut self) {
+        for state_type in &self.stack_of_indices {
+            let state = self.dict_of_states.get_mut(state_type).unwrap();
+            state.on_render();
+        }
+    }
+
+}

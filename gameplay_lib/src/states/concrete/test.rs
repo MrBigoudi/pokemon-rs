@@ -7,7 +7,7 @@ use core_lib::{
             frame::FrameData, graphics_pipelines::graphics_default::DefaultGraphicsPipeline,
         },
     },
-    utils::time::Duration,
+    utils::{debug::ErrorCode, time::Duration},
     wgpu_context::global::get_global_wgpu_state,
     window::key_map::{Key, KeyState},
     DeviceExt,
@@ -72,9 +72,9 @@ impl GameState for GameStateTest {
 
     fn on_enter(&mut self) {}
 
-    fn on_keyboard_input(&mut self, _key: &Key, _key_state: &KeyState) {}
+    fn on_keyboard_input(&mut self, _cur_keys: &HashMap<Key, KeyState>, _old_keys: &HashMap<Key, KeyState>, _new_key: &Key, _new_key_state: &KeyState) {}
 
-    fn on_render(&mut self, frame_data: &mut FrameData) {
+    fn on_render(&mut self, frame_data: &mut FrameData) -> Result<(), ErrorCode> {
         let output = &frame_data.frame_buffer;
         // Create a render pass
         let view = output
@@ -83,17 +83,12 @@ impl GameState for GameStateTest {
 
         let command_encoder = &mut frame_data.command_buffer;
         let mut render_pass = command_encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
-            label: Some("Render Pass"),
+            label: None,
             color_attachments: &[Some(wgpu::RenderPassColorAttachment {
                 view: &view,
                 resolve_target: None,
                 ops: wgpu::Operations {
-                    load: wgpu::LoadOp::Clear(wgpu::Color {
-                        r: 0.1,
-                        g: 0.2,
-                        b: 0.3,
-                        a: 1.0,
-                    }),
+                    load: wgpu::LoadOp::Load,
                     store: wgpu::StoreOp::Store,
                 },
             })],
@@ -119,6 +114,8 @@ impl GameState for GameStateTest {
 
         let num_indices = RECTANGLE_INDICES.len() as u32;
         render_pass.draw_indexed(0..num_indices, 0, 0..1);
+
+        Ok(())
     }
 
     fn on_resize(&mut self, _new_width: f32, _new_height: f32) {}

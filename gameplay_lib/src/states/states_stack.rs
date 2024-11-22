@@ -105,9 +105,18 @@ impl GameStatesStack {
     }
 
     /// The input handling function runs every frame
-    pub fn on_keyboard_input(&mut self, key: &Key, key_state: &KeyState) {
+    pub fn on_keyboard_input(&mut self, cur_keys: &HashMap<Key, KeyState>, old_keys: &HashMap<Key, KeyState>, new_key: &Key, new_key_state: &KeyState) {
         let current_state = self.get_current_state();
-        current_state.as_mut().on_keyboard_input(key, key_state);
+        current_state.as_mut().on_keyboard_input(cur_keys, old_keys, new_key, new_key_state);
+
+        // TODO: remove that
+        if KeyState::Pressed == *new_key_state && Key::A == *new_key {
+            if *self.stack_of_indices.last().unwrap() == GameStateType::OverworldDialog {
+                self.pop().expect("pop failed");
+            } else {
+                self.push(GameStateType::OverworldDialog).expect("push failed");
+            }
+        }
     }
 
     /// The resize function runs on all the states of the machine
@@ -119,11 +128,15 @@ impl GameStatesStack {
 
     /// The render function runs every frame
     /// This function calls the render function of all states in the stack in ascending order
-    pub fn on_render(&mut self, frame_data: &mut FrameData) {
+    pub fn on_render(&mut self, frame_data: &mut FrameData) -> Result<(), ErrorCode> {
         for state_type in &self.stack_of_indices {
             let state = self.dict_of_states.get_mut(state_type).unwrap();
-            state.on_render(frame_data);
+            if let Err(err) = state.on_render(frame_data) {
+                error!("Failed to render the state `{:?}': {:?}", state.get_type(), err);
+                return Err(ErrorCode::Unknown);
+            }
         }
+        Ok(())
     }
 
     /// Removes all the states from the machine

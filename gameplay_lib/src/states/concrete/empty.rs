@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use core_lib::{
     scene::rendering::frame::FrameData,
-    utils::time::Duration,
+    utils::{debug::ErrorCode, time::Duration},
     window::key_map::{Key, KeyState},
 };
 
@@ -22,10 +22,10 @@ impl GameState for GameStateEmpty {
 
     fn on_enter(&mut self) {}
 
-    fn on_keyboard_input(&mut self, _key: &Key, _key_state: &KeyState) {}
+    fn on_keyboard_input(&mut self, _cur_keys: &HashMap<Key, KeyState>, _old_keys: &HashMap<Key, KeyState>, _new_key: &Key, _new_key_state: &KeyState) {}
 
-    fn on_render(&mut self, frame_data: &mut FrameData) {
-        // Draw a black background
+    fn on_render(&mut self, frame_data: &mut FrameData) -> Result<(), ErrorCode> {
+        // Draw the background
         // Needed to get the correct image format
         let output = &frame_data.frame_buffer;
         // Create a render pass
@@ -35,15 +35,15 @@ impl GameState for GameStateEmpty {
 
         let command_encoder = &mut frame_data.command_buffer;
         let _render_pass = command_encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
-            label: Some("Render Pass"),
+            label: None,
             color_attachments: &[Some(wgpu::RenderPassColorAttachment {
                 view: &view,
                 resolve_target: None,
                 ops: wgpu::Operations {
                     load: wgpu::LoadOp::Clear(wgpu::Color {
-                        r: 0.,
-                        g: 0.,
-                        b: 0.,
+                        r: 0.1,
+                        g: 0.2,
+                        b: 0.3,
                         a: 1.0,
                     }),
                     store: wgpu::StoreOp::Store,
@@ -53,6 +53,8 @@ impl GameState for GameStateEmpty {
             occlusion_query_set: None,
             timestamp_writes: None,
         });
+
+        Ok(())
     }
 
     fn on_resize(&mut self, _new_width: f32, _new_height: f32) {}

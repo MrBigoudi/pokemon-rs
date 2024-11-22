@@ -26,6 +26,8 @@ pub struct Application {
     pub delta_time: Duration,
 
     pub keys: HashMap<Key, KeyState>,
+    pub last_keys: HashMap<Key, KeyState>,
+
     #[cfg(not(target_arch = "wasm32"))]
     pub mouse_position: winit::dpi::LogicalPosition<f64>,
 
@@ -115,8 +117,21 @@ impl Application {
             error!("Failed to create the test game state: {:?}", err);
             return Err(ErrorCode::Unknown);
         }
+        if let Err(err) = game_states.add(Box::new(
+            gameplay_lib::states::concrete::overworld_dialog::GameStateOverworldDialog::default(),
+        )) {
+            error!("Failed to create the overworld dialog game state: {:?}", err);
+            return Err(ErrorCode::Unknown);
+        }
+
+
+        // TODO: remove this
         if let Err(err) = game_states.push(gameplay_lib::states::state::GameStateType::Test) {
             error!("Failed to push the test game state: {:?}", err);
+            return Err(ErrorCode::Unknown);
+        }
+        if let Err(err) = game_states.push(gameplay_lib::states::state::GameStateType::OverworldDialog) {
+            error!("Failed to push the overworld dialog game state: {:?}", err);
             return Err(ErrorCode::Unknown);
         }
 
@@ -150,6 +165,8 @@ impl Application {
             last_frame: Default::default(),
             delta_time: Default::default(),
             keys: Default::default(),
+            last_keys: Default::default(),
+
             #[cfg(not(target_arch = "wasm32"))]
             mouse_position: Default::default(),
             game_states,

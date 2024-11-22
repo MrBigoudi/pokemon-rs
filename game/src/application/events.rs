@@ -28,8 +28,7 @@ impl Application {
             }
         };
 
-        // TODO: add state render functions
-        self.game_states.on_render(&mut frame_data);
+        self.game_states.on_render(&mut frame_data)?;
 
         self.wgpu_state.on_end_render(frame_data);
         Ok(())
@@ -77,7 +76,7 @@ impl Application {
                 // Update global keys
                 let _ = self.keys.insert(key, state);
                 // Update game states
-                self.game_states.on_keyboard_input(&key, &state);
+                self.game_states.on_keyboard_input(&self.keys, &self.last_keys, &key, &state);
             }
         }
     }

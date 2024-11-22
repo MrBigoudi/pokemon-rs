@@ -1,4 +1,7 @@
-use common_lib::{debug::ErrorCode, time::Instant};
+use core_lib::{
+    utils::{debug::ErrorCode, time::Instant},
+    window::key_map::{Key, KeyState},
+};
 use log::error;
 use winit::{
     dpi::PhysicalSize,
@@ -8,21 +11,26 @@ use winit::{
 
 use crate::application::app::Application;
 
-use super::key_map::{Key, KeyState};
-
 impl Application {
     pub fn on_exit(&mut self) -> Result<(), ErrorCode> {
         Ok(())
     }
 
     pub fn on_render(&mut self) -> Result<(), ErrorCode> {
-        if let Err(err) = self.wgpu_state.on_render(&self.default_graphics_pipeline) {
-            error!(
-                "Failed to handle a render event on the wgpu state: {:?}",
-                err
-            );
-            return Err(ErrorCode::Wgpu);
-        }
+        let mut frame_data = match self.wgpu_state.on_begin_render() {
+            Ok(frame) => frame,
+            Err(err) => {
+                error!(
+                    "Failed to initialize the reder pass on the wgpu state: {:?}",
+                    err
+                );
+                return Err(ErrorCode::Wgpu);
+            }
+        };
+
+        self.game_states.on_render(&mut frame_data)?;
+
+        self.wgpu_state.on_end_render(frame_data);
         Ok(())
     }
 
@@ -35,26 +43,20 @@ impl Application {
             return Err(ErrorCode::Wgpu);
         }
 
-        if let Some(scene) = std::sync::Arc::get_mut(&mut self.scene) {
-            scene.on_resize(new_size);
-        }
+        self.game_states
+            .on_resize(new_size.width as f32, new_size.height as f32);
+
         Ok(())
     }
 
-    pub fn on_update(&mut self) -> Result<(), ErrorCode> {
+    pub fn on_update(&mut self) {
         // Update delta time
         let now = Instant::now();
         self.delta_time = now - self.last_frame;
         self.last_frame = now;
-        // Update state
-        if let Err(err) = self.wgpu_state.on_update(&self.delta_time) {
-            error!(
-                "Failed to handle an update event on the wgpu state: {:?}",
-                err
-            );
-            return Err(ErrorCode::Wgpu);
-        }
-        Ok(())
+
+        // Update game state
+        self.game_states.on_update(&self.keys, &self.delta_time);
     }
 
     pub fn on_keyboard_input(
@@ -62,7 +64,7 @@ impl Application {
         _device_id: DeviceId,
         event: KeyEvent,
         _is_synthetic: bool,
-    ) -> Result<(), ErrorCode> {
+    ) {
         if let KeyEvent {
             physical_key: PhysicalKey::Code(key_code),
             state,
@@ -71,10 +73,12 @@ impl Application {
         {
             if let Some(key) = Key::from_winit(key_code) {
                 let state = KeyState::from_winit(state);
+                // Update global keys
                 let _ = self.keys.insert(key, state);
+                // Update game states
+                self.game_states.on_keyboard_input(&self.keys, &self.last_keys, &key, &state);
             }
         }
-        Ok(())
     }
 
     #[cfg(not(target_arch = "wasm32"))]

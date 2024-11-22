@@ -1,4 +1,4 @@
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum ErrorCode {
     IO,
     Wgpu,
@@ -9,4 +9,6 @@ pub enum ErrorCode {
     NotInitialized,
     AlreadyInitialized,
     Network,
+    Duplicate,
+    BadValue,
 }

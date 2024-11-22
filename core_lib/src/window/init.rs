@@ -1,5 +1,4 @@
 use cfg_if::cfg_if;
-use common_lib::debug::ErrorCode;
 use log::error;
 
 use winit::{
@@ -8,7 +7,7 @@ use winit::{
     window::{Window, WindowAttributes},
 };
 
-use crate::application::parameters::ApplicationParameters;
+use crate::utils::{config::ApplicationParameters, debug::ErrorCode};
 
 pub struct WindowContext;
 
@@ -36,6 +35,7 @@ impl WindowContext {
         let pos_x = (monitor_width - logical_width * scale_factor) / 2.0;
         let pos_y = (monitor_height - logical_height * scale_factor) / 2.0;
         use winit::dpi::Position;
+
         let position = Position::new(Position::Physical((pos_x, pos_y).into()));
 
         WindowAttributes::default()

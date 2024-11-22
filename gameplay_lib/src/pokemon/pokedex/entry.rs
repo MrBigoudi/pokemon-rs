@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use common_lib::debug::ErrorCode;
+use core_lib::utils::debug::ErrorCode;
 use log::error;
 
 use crate::pokemon::{stats::Stats, types::Type};

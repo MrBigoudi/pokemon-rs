@@ -8,7 +8,7 @@ pub struct Toml;
 
 impl Toml {
     pub async fn get_toml(path: &Path) -> Result<toml::Table, ErrorCode> {
-        let toml_content = match crate::io::load_string(path).await {
+        let toml_content = match super::io::load_string(path).await {
             Ok(content) => content,
             Err(err) => {
                 error!("Failed to read the toml file `{:?}': {:?}", path, err);

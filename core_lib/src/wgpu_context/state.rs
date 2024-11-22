@@ -1,11 +1,10 @@
 use std::sync::{Arc, Mutex};
 
-use common_lib::debug::ErrorCode;
 use log::{error, warn};
-use wgpu::util::DeviceExt;
+
 use winit::{dpi::PhysicalSize, window::Window};
 
-use crate::application::parameters::ApplicationParameters;
+use crate::utils::{config::ApplicationParameters, debug::ErrorCode};
 
 pub struct State {
     pub size: Mutex<PhysicalSize<u32>>,
@@ -14,10 +13,6 @@ pub struct State {
     pub device: wgpu::Device,
     pub queue: wgpu::Queue,
     pub window: Arc<Window>,
-
-    // TODO: Update this
-    pub vertex_buffer: wgpu::Buffer,
-    pub index_buffer: wgpu::Buffer,
 }
 
 impl State {
@@ -165,24 +160,6 @@ impl State {
         }
     }
 
-    fn init_vertex_buffer(device: &wgpu::Device) -> wgpu::Buffer {
-        let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-            label: Some("TriangleVertexBuffer"),
-            contents: bytemuck::cast_slice(crate::scene::geometry::vertex::RECTANGLE_VERTICES),
-            usage: wgpu::BufferUsages::VERTEX,
-        });
-        vertex_buffer
-    }
-
-    fn init_index_buffer(device: &wgpu::Device) -> wgpu::Buffer {
-        let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-            label: Some("TriangleIndexBuffer"),
-            contents: bytemuck::cast_slice(crate::scene::geometry::vertex::RECTANGLE_INDICES),
-            usage: wgpu::BufferUsages::INDEX,
-        });
-        vertex_buffer
-    }
-
     pub async fn new(
         parameters: &ApplicationParameters,
         window: Arc<Window>,
@@ -195,9 +172,6 @@ impl State {
         let config = Mutex::new(Self::init_surface_config(&surface, &adapter, &size));
         let size = Mutex::new(size);
 
-        let vertex_buffer = Self::init_vertex_buffer(&device);
-        let index_buffer = Self::init_index_buffer(&device);
-
         Ok(Self {
             size,
             surface,
@@ -205,8 +179,6 @@ impl State {
             device,
             queue,
             window,
-            vertex_buffer,
-            index_buffer,
         })
     }
 }

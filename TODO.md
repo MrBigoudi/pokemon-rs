@@ -2,7 +2,9 @@
 
 ## To fix
 
-- Fix server (request + results)
+- Fix async issue
 - Multiple evolution possible
 
 ## To add
+
+- Add states in the application

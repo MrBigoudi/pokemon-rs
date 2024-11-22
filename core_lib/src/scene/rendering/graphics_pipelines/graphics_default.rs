@@ -1,15 +1,18 @@
 use std::path::PathBuf;
 
-use common_lib::debug::ErrorCode;
-
 use wgpu::util::DeviceExt;
 
 use crate::{
-    application::wgpu_context::pipelines::{
+    scene::{
+        camera::{Camera, ProjectionType},
+        geometry::vertex::Vertex,
+        rendering::texture,
+    },
+    utils::debug::ErrorCode,
+    wgpu_context::pipelines::{
         graphics::{GraphicsPipeline, GraphicsPipelineBase},
         PipelineResources,
     },
-    scene::{camera::ProjectionType, geometry::vertex::Vertex, rendering::texture},
 };
 
 pub struct DefaultGraphicsPipelineResources {
@@ -156,11 +159,12 @@ impl GraphicsPipeline for DefaultGraphicsPipeline {
             None,
         )
         .await?;
-        let global_scene = Self::get_global_scene()?;
+
+        // TODO: get camera
         // Init the camera buffer
-        let camera_gpu = global_scene
-            .camera
-            .to_camera_gpu(ProjectionType::Perspective);
+        let width = global_wgpu_state.size.lock().unwrap().width as f32;
+        let height = global_wgpu_state.size.lock().unwrap().height as f32;
+        let camera_gpu = Camera::new(width, height).to_camera_gpu(ProjectionType::Perspective);
         let camera_buffer =
             global_wgpu_state
                 .device

@@ -1,3 +1,5 @@
+use core_lib::utils::config::ApplicationParameters;
+
 use log::warn;
 use winit::{
     application::ApplicationHandler,
@@ -6,7 +8,7 @@ use winit::{
     window::WindowId,
 };
 
-use super::{app::Application, parameters::ApplicationParameters};
+use super::app::Application;
 
 pub enum ApplicationState {
     Uninitialized { parameters: ApplicationParameters },
@@ -60,7 +62,7 @@ impl ApplicationHandler for ApplicationState {
                 warn!("The application is not initialized correctly...")
             }
             ApplicationState::Initialized(app) => {
-                app.on_update().expect("Failed to update the application");
+                app.on_update();
             }
         }
     }
@@ -95,8 +97,7 @@ impl ApplicationHandler for ApplicationState {
                 event,
                 is_synthetic,
             } => {
-                app.on_keyboard_input(device_id, event, is_synthetic)
-                    .expect("Failed to handle keyboard input event");
+                app.on_keyboard_input(device_id, event, is_synthetic);
             }
 
             #[cfg(not(target_arch = "wasm32"))]

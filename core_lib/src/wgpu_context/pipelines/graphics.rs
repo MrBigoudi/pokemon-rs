@@ -1,12 +1,10 @@
 use std::{path::Path, sync::Arc};
 
-use common_lib::debug::ErrorCode;
 use log::error;
 
 use crate::{
-    application::wgpu_context::{shaders::Shader, state::State},
-    global,
-    scene::Scene,
+    utils::debug::ErrorCode,
+    wgpu_context::{global, shaders::Shader, state::State},
 };
 
 use super::PipelineResources;
@@ -38,19 +36,6 @@ pub trait GraphicsPipeline {
         }
     }
 
-    fn get_global_scene() -> Result<Arc<Scene>, ErrorCode> {
-        match global::get_global_scene() {
-            Ok(scene) => Ok(scene),
-            Err(err) => {
-                error!(
-                    "Failed to get the global scene when creating a graphics pipeline: {:?}",
-                    err
-                );
-                Err(ErrorCode::Unknown)
-            }
-        }
-    }
-
     #[allow(async_fn_in_trait)]
     async fn from_multiple_shader_paths(
         vertex_shader_path: &Path,
@@ -60,11 +45,13 @@ pub trait GraphicsPipeline {
     ) -> Result<(Self::Resources, GraphicsPipelineBase), ErrorCode> {
         let global_wgpu_state = Self::get_global_wgpu_state()?;
 
-        let vertex_module = match Shader::get_shader_module (
+        let vertex_module = match Shader::get_shader_module(
             vertex_label,
             vertex_shader_path,
             &global_wgpu_state.device,
-        ).await {
+        )
+        .await
+        {
             Ok(shader) => shader,
             Err(err) => {
                 error!(
@@ -75,11 +62,13 @@ pub trait GraphicsPipeline {
             }
         };
 
-        let fragment_module = match Shader::get_shader_module (
+        let fragment_module = match Shader::get_shader_module(
             fragment_label,
             fragment_shader_path,
             &global_wgpu_state.device,
-        ).await {
+        )
+        .await
+        {
             Ok(shader) => shader,
             Err(err) => {
                 error!(
@@ -103,7 +92,9 @@ pub trait GraphicsPipeline {
         let global_wgpu_state = Self::get_global_wgpu_state()?;
 
         let shader_module =
-            match Shader::get_shader_module(shader_label, shader_path, &global_wgpu_state.device).await {
+            match Shader::get_shader_module(shader_label, shader_path, &global_wgpu_state.device)
+                .await
+            {
                 Ok(shader) => shader,
                 Err(err) => {
                     error!(
@@ -114,7 +105,8 @@ pub trait GraphicsPipeline {
                 }
             };
 
-        Self::from_single_shader_module(shader_module, vertex_entry_point, fragment_entry_point).await
+        Self::from_single_shader_module(shader_module, vertex_entry_point, fragment_entry_point)
+            .await
     }
 
     #[allow(async_fn_in_trait)]

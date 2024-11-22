@@ -8,3 +8,4 @@
 ## To add
 
 - Add states in the application
+- Add background for the text boxes

@@ -99,24 +99,33 @@ impl GameStatesStack {
     }
 
     /// The update function runs every frame
-    pub fn on_update(&mut self, keys: &HashMap<Key, KeyState>, delta_time: &Duration) {
+    pub fn on_update(&mut self, keys: &HashMap<Key, KeyState>, delta_time: &Duration) -> Result<(), ErrorCode> {
+        // Update the current state
         let current_state = self.get_current_state();
         current_state.as_mut().on_update(keys, delta_time);
+
+        // Check for any state on the top of the stack that needs to be swapped or removed
+        'swap_states: loop {
+            let state = self.get_current_state();
+            let state_type = state.get_type();
+            if !state.should_be_swapped() {
+                break 'swap_states;
+            }
+            
+            self.pop()?;
+            let state = self.dict_of_states.get(&state_type).unwrap();
+            if state.should_be_removed() {
+                self.remove(state_type)?;
+            }
+        }
+
+        Ok(())
     }
 
     /// The input handling function runs every frame
     pub fn on_keyboard_input(&mut self, cur_keys: &HashMap<Key, KeyState>, old_keys: &HashMap<Key, KeyState>, new_key: &Key, new_key_state: &KeyState) {
         let current_state = self.get_current_state();
         current_state.as_mut().on_keyboard_input(cur_keys, old_keys, new_key, new_key_state);
-
-        // TODO: remove that
-        if KeyState::Pressed == *new_key_state && Key::A == *new_key {
-            if *self.stack_of_indices.last().unwrap() == GameStateType::OverworldDialog {
-                self.pop().expect("pop failed");
-            } else {
-                self.push(GameStateType::OverworldDialog).expect("push failed");
-            }
-        }
     }
 
     /// The resize function runs on all the states of the machine

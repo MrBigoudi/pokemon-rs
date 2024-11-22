@@ -58,4 +58,12 @@ impl GameState for GameStateEmpty {
     }
 
     fn on_resize(&mut self, _new_width: f32, _new_height: f32) {}
+    
+    fn should_be_swapped(&self) -> bool {
+        false
+    }
+    
+    fn should_be_removed(&self) -> bool {
+        false
+    }
 }

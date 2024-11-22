@@ -19,6 +19,12 @@ pub enum GameStateType {
 /// A game state used in the states stack
 /// @see GameStatesStack
 pub trait GameState {
+    /// Tells if the state need to be swapped out
+    fn should_be_swapped(&self) -> bool;
+
+    /// Tells if the state should be removed forever
+    fn should_be_removed(&self) -> bool;
+
     /// Accessor to the type of game state
     fn get_type(&self) -> GameStateType;
 

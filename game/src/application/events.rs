@@ -49,14 +49,19 @@ impl Application {
         Ok(())
     }
 
-    pub fn on_update(&mut self) {
+    pub fn on_update(&mut self) -> Result<(), ErrorCode> {
         // Update delta time
         let now = Instant::now();
         self.delta_time = now - self.last_frame;
         self.last_frame = now;
 
         // Update game state
-        self.game_states.on_update(&self.keys, &self.delta_time);
+        if let Err(err) = self.game_states.on_update(&self.keys, &self.delta_time){
+            error!("Failed to update the game states: {:?}", err);
+            return Err(ErrorCode::Unknown);
+        }
+
+        Ok(())
     }
 
     pub fn on_keyboard_input(

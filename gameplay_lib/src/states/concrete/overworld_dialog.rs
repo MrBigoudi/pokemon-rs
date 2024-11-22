@@ -10,12 +10,16 @@ use crate::states::state::{GameState, GameStateType};
 
 /// The game state to render dialog
 pub struct GameStateOverworldDialog {
+    // For displaying text
     pub font_system: glyphon::FontSystem,
     pub swash_cache: glyphon::SwashCache,
     pub viewport: glyphon::Viewport,
     pub atlas: glyphon::TextAtlas,
     pub text_renderer: glyphon::TextRenderer,
     pub text_buffer: glyphon::Buffer,
+
+    // Other attributes
+    pub should_be_swapped: bool,
 }
 
 impl GameStateOverworldDialog {
@@ -50,7 +54,7 @@ impl GameStateOverworldDialog {
         };
         let mut text_buffer = glyphon::Buffer::new(font_system, metrics);
 
-        let text = "Hello world!";
+        let text = "Press escape to close";
         let attrs = glyphon::Attrs::new().family(glyphon::Family::SansSerif);
         let shaping = glyphon::Shaping::Advanced;
         text_buffer.set_text(font_system, text, attrs, shaping);
@@ -137,6 +141,7 @@ impl Default for GameStateOverworldDialog {
             atlas,
             text_renderer,
             text_buffer,
+            should_be_swapped: false,
         }
     }
 }
@@ -148,11 +153,19 @@ impl GameState for GameStateOverworldDialog {
 
     fn on_update(&mut self, _keys: &HashMap<Key, KeyState>, _delta_time: &Duration) {}
 
-    fn on_exit(&mut self) {}
+    fn on_exit(&mut self) {
+        self.should_be_swapped = true;
+    }
 
-    fn on_enter(&mut self) {}
+    fn on_enter(&mut self) {
+        self.should_be_swapped = false;
+    }
 
-    fn on_keyboard_input(&mut self, _cur_keys: &HashMap<Key, KeyState>, _old_keys: &HashMap<Key, KeyState>, _new_key: &Key, _new_key_state: &KeyState) {}
+    fn on_keyboard_input(&mut self, _cur_keys: &HashMap<Key, KeyState>, _old_keys: &HashMap<Key, KeyState>, new_key: &Key, new_key_state: &KeyState) {
+        if *new_key_state == KeyState::Pressed && *new_key == Key::Escape {
+            self.should_be_swapped = true;
+        }
+    }
 
     fn on_render(&mut self, frame_data: &mut FrameData) -> Result<(), ErrorCode> {
         self.atlas.trim();
@@ -200,5 +213,13 @@ impl GameState for GameStateOverworldDialog {
             .queue
         ;
         self.viewport.update(queue, new_resolution);
+    }
+    
+    fn should_be_swapped(&self) -> bool {
+        self.should_be_swapped
+    }
+    
+    fn should_be_removed(&self) -> bool {
+        false
     }
 }

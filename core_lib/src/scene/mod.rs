@@ -3,6 +3,7 @@ use camera::Camera;
 pub mod camera;
 pub mod geometry;
 pub mod rendering;
+pub mod animation;
 
 pub struct Scene {
     pub camera: Camera,

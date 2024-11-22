@@ -10,10 +10,9 @@ use core_lib::{
 pub enum GameStateType {
     #[default]
     Empty,
-    // TODO: Remove this
-    Test,
-    // TODO: Add other types of game state
+    Overworld,
     OverworldDialog,
+    // TODO: Add other types of game state
 }
 
 /// A game state used in the states stack

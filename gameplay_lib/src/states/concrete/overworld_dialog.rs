@@ -54,7 +54,7 @@ impl GameStateOverworldDialog {
         };
         let mut text_buffer = glyphon::Buffer::new(font_system, metrics);
 
-        let text = "Press escape to close";
+        let text = "Press escape to leave this state";
         let attrs = glyphon::Attrs::new().family(glyphon::Family::SansSerif);
         let shaping = glyphon::Shaping::Advanced;
         text_buffer.set_text(font_system, text, attrs, shaping);
@@ -110,15 +110,15 @@ impl GameStateOverworldDialog {
 impl Default for GameStateOverworldDialog {
     fn default() -> Self {
         let device = &get_global_wgpu_state()
-            .expect("Failed to fetch the global gpu state")
+            .unwrap()
             .device
         ;
         let queue = &get_global_wgpu_state()
-            .expect("Failed to fetch the global gpu state")
+            .unwrap()
             .queue
         ;
         let surface_format = get_global_wgpu_state()
-            .expect("Failed to fetch the global gpu state")
+            .unwrap()
             .config
             .lock()
             .unwrap()

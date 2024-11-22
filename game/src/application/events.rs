@@ -50,10 +50,13 @@ impl Application {
     }
 
     pub fn on_update(&mut self) -> Result<(), ErrorCode> {
-        // Update delta time
+        // Update delta time and cap the frame rate
         let now = Instant::now();
         self.delta_time = now - self.last_frame;
         self.last_frame = now;
+        if self.delta_time < self.target_frame_time {
+            Instant::sleep(self.target_frame_time - self.delta_time);
+        }
 
         // Update game state
         if let Err(err) = self.game_states.on_update(&self.keys, &self.delta_time){

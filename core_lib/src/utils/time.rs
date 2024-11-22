@@ -43,6 +43,18 @@ impl Instant {
             }
         }
     }
+
+    /// Sleeps for a given amount of time
+    pub fn sleep(duration: Duration) {
+        cfg_if! {
+            if #[cfg(not(target_arch = "wasm32"))] {
+                std::thread::sleep(std::time::Duration::from_secs_f64(duration));
+            } else {
+                // TODO: Implement sleep for wasm
+                todo!()
+            }
+        }
+    }
 }
 
 impl Sub for Instant {

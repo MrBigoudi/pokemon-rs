@@ -24,6 +24,7 @@ pub struct Application {
 
     pub last_frame: Instant,
     pub delta_time: Duration,
+    pub target_frame_time: Duration,
 
     pub keys: HashMap<Key, KeyState>,
     pub last_keys: HashMap<Key, KeyState>,
@@ -164,6 +165,8 @@ impl Application {
             wgpu_state,
             last_frame: Default::default(),
             delta_time: Default::default(),
+            target_frame_time: (1. / parameters.max_frame_rate as Duration),
+
             keys: Default::default(),
             last_keys: Default::default(),
 

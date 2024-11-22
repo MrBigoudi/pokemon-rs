@@ -5,7 +5,7 @@ pub mod experience_group;
 pub mod names;
 pub mod wild_attributes;
 
-use common_lib::{debug::ErrorCode, toml::Toml};
+use core_lib::utils::{debug::ErrorCode, toml::Toml};
 
 use entry::PokedexEntry;
 
@@ -32,13 +32,10 @@ impl Pokedex {
     }
 
     fn new() -> Result<Self, ErrorCode> {
-        let toml = match pollster::block_on(Self::get_toml()){
+        let toml = match pollster::block_on(Self::get_toml()) {
             Ok(toml) => toml,
             Err(err) => {
-                error!(
-                    "Failed to block on the Pokedex's toml: {:?}",
-                    err
-                );
+                error!("Failed to block on the Pokedex's toml: {:?}", err);
                 return Err(ErrorCode::Unknown);
             }
         };

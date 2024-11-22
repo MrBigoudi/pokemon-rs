@@ -1,13 +1,20 @@
 use std::collections::HashMap;
 
-use common_lib::{debug::ErrorCode, time::Duration};
+use core_lib::{
+    scene::rendering::frame::FrameData,
+    utils::{debug::ErrorCode, time::Duration},
+    window::key_map::{Key, KeyState},
+};
 use log::error;
 
-use super::{concrete::empty::GameStateEmpty, state::{GameState, GameStateType}};
+use super::{
+    concrete::empty::GameStateEmpty,
+    state::{GameState, GameStateType},
+};
 
-pub struct GameStatesStack{
+pub struct GameStatesStack {
     pub stack_of_indices: Vec<GameStateType>,
-    pub dict_of_states: HashMap<GameStateType, Box<dyn GameState>>, 
+    pub dict_of_states: HashMap<GameStateType, Box<dyn GameState>>,
 }
 
 impl Default for GameStatesStack {
@@ -17,7 +24,7 @@ impl Default for GameStatesStack {
 }
 
 impl GameStatesStack {
-    /// Initialize a game states stack with an empty state
+    /// Initializes a game states stack with an empty state
     fn new() -> Self {
         let state = GameStateEmpty;
         let stack_of_indices = vec![state.get_type()];
@@ -30,7 +37,7 @@ impl GameStatesStack {
         }
     }
 
-    /// Add a state to the state machine
+    /// Adds a state to the state machine
     /// Failes if a state of the same type has already been added
     pub fn add(&mut self, state: Box<dyn GameState>) -> Result<(), ErrorCode> {
         let state_type = state.get_type();
@@ -72,12 +79,12 @@ impl GameStatesStack {
     /// Pop a state from the stack and update both the old and the current states
     /// Failes if the stack is empty
     pub fn pop(&mut self) -> Result<(), ErrorCode> {
-        match self.stack_of_indices.pop(){
+        match self.stack_of_indices.pop() {
             Some(old_state_type) => {
                 let new_state_type = *self.stack_of_indices.last().unwrap();
                 self.on_change(&old_state_type, &new_state_type);
                 Ok(())
-            },
+            }
             None => {
                 error!("Can't pop from an empty stack");
                 Err(ErrorCode::NotInitialized)
@@ -85,24 +92,22 @@ impl GameStatesStack {
         }
     }
 
-
     /// Get the state at the top of the stack
     fn get_current_state(&mut self) -> &mut Box<dyn GameState> {
         let current_state_type = self.stack_of_indices.last().unwrap();
         self.dict_of_states.get_mut(current_state_type).unwrap()
     }
 
-    
     /// The update function runs every frame
-    pub fn on_update(&mut self, delta_time: Duration) {
+    pub fn on_update(&mut self, keys: &HashMap<Key, KeyState>, delta_time: &Duration) {
         let current_state = self.get_current_state();
-        current_state.as_mut().on_update(delta_time);        
+        current_state.as_mut().on_update(keys, delta_time);
     }
 
     /// The input handling function runs every frame
-    pub fn on_input(&mut self) {
+    pub fn on_keyboard_input(&mut self, key: &Key, key_state: &KeyState) {
         let current_state = self.get_current_state();
-        current_state.as_mut().on_input();        
+        current_state.as_mut().on_keyboard_input(key, key_state);
     }
 
     /// The resize function runs on all the states of the machine
@@ -112,14 +117,51 @@ impl GameStatesStack {
         }
     }
 
-
     /// The render function runs every frame
-    /// This function call the render function of all states in the stack in ascending order
-    pub fn on_render(&mut self) {
+    /// This function calls the render function of all states in the stack in ascending order
+    pub fn on_render(&mut self, frame_data: &mut FrameData) {
         for state_type in &self.stack_of_indices {
             let state = self.dict_of_states.get_mut(state_type).unwrap();
-            state.on_render();
+            state.on_render(frame_data);
         }
     }
 
+    /// Removes all the states from the machine
+    pub fn reset(&mut self) {
+        *self = Self::new();
+    }
+
+    /// Removes one state from the machine
+    /// Failes if the state was used in the stack
+    /// Failes if the state was not in the machine
+    /// Failes if the state is the default state
+    pub fn remove(&mut self, state_type: GameStateType) -> Result<(), ErrorCode> {
+        if state_type == GameStateType::default() {
+            error!("Failed to remove the state `{:?}' from the game states stack: state is the default one", state_type);
+            return Err(ErrorCode::BadValue);
+        }
+
+        if self.stack_of_indices.contains(&state_type) {
+            error!(
+                "Failed to remove the state `{:?}' from the game states stack: state is in use",
+                state_type
+            );
+            return Err(ErrorCode::BadValue);
+        }
+
+        if !self.dict_of_states.contains_key(&state_type) {
+            error!("Failed to remove the state `{:?}' from the game states stack: state is not present", state_type);
+            return Err(ErrorCode::BadValue);
+        }
+
+        if self.dict_of_states.remove(&state_type).is_none() {
+            error!(
+                "Failed to remove the state `{:?}' from the game states stack: unknown",
+                state_type
+            );
+            return Err(ErrorCode::Unknown);
+        }
+
+        Ok(())
+    }
 }

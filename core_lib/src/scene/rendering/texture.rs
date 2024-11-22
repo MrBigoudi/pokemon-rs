@@ -1,8 +1,9 @@
 use std::path::Path;
 
-use common_lib::debug::ErrorCode;
 use image::GenericImageView;
 use log::error;
+
+use crate::utils::{debug::ErrorCode, io};
 
 pub struct Texture {
     pub texture: wgpu::Texture,
@@ -17,7 +18,7 @@ impl Texture {
         queue: &wgpu::Queue,
         label: Option<&str>,
     ) -> Result<Self, ErrorCode> {
-        let content = match common_lib::io::load_bytes(path).await {
+        let content = match io::load_bytes(path).await {
             Ok(bytes) => bytes,
             Err(err) => {
                 error!(

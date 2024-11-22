@@ -1,9 +1,8 @@
 use std::sync::Arc;
 
-use common_lib::debug::ErrorCode;
 use log::error;
 
-use crate::wgpu_context::state::State;
+use crate::{utils::debug::ErrorCode, wgpu_context::state::State};
 
 static mut GLOBAL_WGPU_STATE: Option<Arc<State>> = None;
 

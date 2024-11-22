@@ -10,4 +10,5 @@ pub enum ErrorCode {
     AlreadyInitialized,
     Network,
     Duplicate,
+    BadValue,
 }

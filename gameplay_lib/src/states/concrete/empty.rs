@@ -1,4 +1,10 @@
-use common_lib::time::Duration;
+use std::collections::HashMap;
+
+use core_lib::{
+    scene::rendering::frame::FrameData,
+    utils::time::Duration,
+    window::key_map::{Key, KeyState},
+};
 
 use crate::states::state::{GameState, GameStateType};
 
@@ -10,15 +16,44 @@ impl GameState for GameStateEmpty {
         GameStateType::Empty
     }
 
-    fn on_update(&mut self, _delta_time: Duration) {}
+    fn on_update(&mut self, _keys: &HashMap<Key, KeyState>, _delta_time: &Duration) {}
 
     fn on_exit(&mut self) {}
 
     fn on_enter(&mut self) {}
 
-    fn on_input(&mut self) {}
+    fn on_keyboard_input(&mut self, _key: &Key, _key_state: &KeyState) {}
 
-    fn on_render(&mut self) {}
-    
+    fn on_render(&mut self, frame_data: &mut FrameData) {
+        // Draw a black background
+        // Needed to get the correct image format
+        let output = &frame_data.frame_buffer;
+        // Create a render pass
+        let view = output
+            .texture
+            .create_view(&wgpu::TextureViewDescriptor::default());
+
+        let command_encoder = &mut frame_data.command_buffer;
+        let _render_pass = command_encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+            label: Some("Render Pass"),
+            color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+                view: &view,
+                resolve_target: None,
+                ops: wgpu::Operations {
+                    load: wgpu::LoadOp::Clear(wgpu::Color {
+                        r: 0.,
+                        g: 0.,
+                        b: 0.,
+                        a: 1.0,
+                    }),
+                    store: wgpu::StoreOp::Store,
+                },
+            })],
+            depth_stencil_attachment: None,
+            occlusion_query_set: None,
+            timestamp_writes: None,
+        });
+    }
+
     fn on_resize(&mut self, _new_width: f32, _new_height: f32) {}
 }

@@ -56,7 +56,7 @@ pub fn run() {
     // panic!("pokedex");
 
     // Run the app
-    let parameters = common_lib::parameters::ApplicationParameters::default();
+    let parameters = core_lib::utils::config::ApplicationParameters::default();
     if let Err(err) = application::app::Application::run(parameters) {
         panic!("Failed to run the application: {:?}", err);
     }

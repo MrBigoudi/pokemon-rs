@@ -6,6 +6,7 @@ use winit::{dpi::PhysicalSize, window::Window};
 
 use crate::utils::{config::ApplicationParameters, debug::ErrorCode};
 
+#[non_exhaustive]
 pub struct State {
     pub size: Mutex<PhysicalSize<u32>>,
     pub surface: wgpu::Surface<'static>,

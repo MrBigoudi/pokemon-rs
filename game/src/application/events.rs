@@ -1,6 +1,5 @@
 use core_lib::{
-    utils::{debug::ErrorCode, time::Instant},
-    window::key_map::{Key, KeyState},
+    utils::{debug::ErrorCode, time::Instant}, window::key_map::{Key, KeyState}
 };
 use log::error;
 use winit::{
@@ -43,8 +42,11 @@ impl Application {
             return Err(ErrorCode::Wgpu);
         }
 
-        self.game_states
-            .on_resize(new_size.width as f32, new_size.height as f32);
+        let new_width = new_size.width as f32;
+        let new_height = new_size.height as f32;
+
+        // Update game states
+        self.game_states.on_resize(new_width, new_height);
 
         Ok(())
     }

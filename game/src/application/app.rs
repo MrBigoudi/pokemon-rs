@@ -119,7 +119,7 @@ impl Application {
             return Err(ErrorCode::Unknown);
         }
         if let Err(err) = game_states.add(Box::new(
-            gameplay_lib::states::concrete::overworld_dialog::GameStateOverworldDialog::default(),
+            gameplay_lib::states::concrete::overworld_dialog::GameStateOverworldDialog::new()?,
         )) {
             error!("Failed to create the overworld dialog game state: {:?}", err);
             return Err(ErrorCode::Unknown);

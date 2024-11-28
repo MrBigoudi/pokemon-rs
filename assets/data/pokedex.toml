@@ -10,6 +10,9 @@ weight = 6.9
 sprites = ["assets/sprites/pokemons/bulbasaur/front.png"] # TODO: add sprite paths
 shiny_sprites = ["assets/sprites/pokemons/bulbasaur/front_shiny.png"] # TODO: add sprite paths
 types = ["Grass", "Poison"]
+previous_evolution = 0
+next_evolution = 2
+evolution_type = {type="LevelUp", level=16} # leave empty if can't evolve
 egg_groups = ["Monster", "Grass"]
 hatch_time = 20
 gender_ratio = {male = 87.5, female = 12.5, neutral = 0.0}

@@ -3,7 +3,6 @@ pub mod categories;
 pub mod entry;
 pub mod experience_group;
 pub mod names;
-pub mod wild_attributes;
 
 use core_lib::utils::{debug::ErrorCode, toml::Toml};
 

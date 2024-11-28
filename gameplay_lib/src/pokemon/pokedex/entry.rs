@@ -1,4 +1,4 @@
-use std::{path::PathBuf, str::FromStr};
+use std::{fmt, path::PathBuf, str::FromStr};
 
 use core_lib::utils::{debug::ErrorCode, toml::Toml};
 use log::error;
@@ -10,7 +10,7 @@ use super::{
     Id,
 };
 
-#[derive(Debug)]
+
 pub struct PokedexEntry {
     pub pokedex_number: Id,
 
@@ -43,7 +43,62 @@ pub struct PokedexEntry {
     pub base_friendship: u8,
     pub base_experience_yield: u32,
     pub ev_yield: Stats,
+}
 
+impl fmt::Debug for PokedexEntry {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "PokedexEntry {{
+\tpokedex_number: {:?},
+\tname: {:?},
+\tcategory: {:?},
+\tdescription: {:?},
+\theight: {:?},
+\tweight: {:?},
+\tsprites: {:?},
+\tshiny_sprites: {:?},
+\ttype_1: {:?},
+\ttype_2: {:?},
+\tprevious_evolution: {:?},
+\tnext_evolution: {:?},
+\tevolution_type: {:?},
+\tegg_group_1: {:?},
+\tegg_group_2: {:?},
+\thatch_time: {:?},
+\tgender_ratio: {:?},
+\tabilities: {:?},
+\tcatch_rate: {:?},
+\tbase_friendship: {:?},
+\tbase_experience_yield: {:?},
+\tev_yield: {:?},
+\tbase_stats: {:?},
+}}",
+            self.pokedex_number,
+            self.name,
+            self.category,
+            self.description,
+            self.height,
+            self.weight,
+            self.sprites,
+            self.shiny_sprites,
+            self.type_1,
+            self.type_2,
+            self.previous_evolution,
+            self.next_evolution,
+            self.evolution_type,
+            self.egg_group_1,
+            self.egg_group_2,
+            self.hatch_time,
+            self.gender_ratio,
+            self.abilities,
+            self.catch_rate,
+            self.base_friendship,
+            self.base_experience_yield,
+            self.ev_yield,
+            self.base_stats,
+        )
+    }
 }
 
 impl PokedexEntry {

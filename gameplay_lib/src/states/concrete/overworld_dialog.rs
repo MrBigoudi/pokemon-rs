@@ -1,7 +1,16 @@
 use std::collections::HashMap;
 
 use core_lib::{
-    scene::{rendering::frame::FrameData, text::{font::FontFamily, global::resize_global_font_system, text_instance::{TextInstance, TextParameters}}}, utils::{debug::ErrorCode, time::Duration}, window::key_map::{Key, KeyState}
+    scene::{
+        rendering::frame::FrameData,
+        text::{
+            font::FontFamily,
+            global::resize_global_font_system,
+            text_instance::{TextInstance, TextParameters},
+        },
+    },
+    utils::{debug::ErrorCode, time::Duration},
+    window::key_map::{Key, KeyState},
 };
 use log::error;
 
@@ -31,7 +40,11 @@ impl GameStateOverworldDialog {
         let text_instance = match TextInstance::new(parameters) {
             Ok(instance) => instance,
             Err(err) => {
-                error!("Failed to create the text instance for the game state `{:?}': {:?}", GameStateType::OverworldDialog, err);
+                error!(
+                    "Failed to create the text instance for the game state `{:?}': {:?}",
+                    GameStateType::OverworldDialog,
+                    err
+                );
                 return Err(ErrorCode::Unknown);
             }
         };
@@ -58,7 +71,13 @@ impl GameState for GameStateOverworldDialog {
         self.should_be_swapped = false;
     }
 
-    fn on_keyboard_input(&mut self, _cur_keys: &HashMap<Key, KeyState>, _old_keys: &HashMap<Key, KeyState>, new_key: &Key, new_key_state: &KeyState) {
+    fn on_keyboard_input(
+        &mut self,
+        _cur_keys: &HashMap<Key, KeyState>,
+        _old_keys: &HashMap<Key, KeyState>,
+        new_key: &Key,
+        new_key_state: &KeyState,
+    ) {
         if *new_key_state == KeyState::Pressed && *new_key == Key::Escape {
             self.should_be_swapped = true;
         }
@@ -96,11 +115,11 @@ impl GameState for GameStateOverworldDialog {
     fn on_resize(&mut self, new_width: f32, new_height: f32) {
         resize_global_font_system(new_width, new_height);
     }
-    
+
     fn should_be_swapped(&self) -> bool {
         self.should_be_swapped
     }
-    
+
     fn should_be_removed(&self) -> bool {
         false
     }

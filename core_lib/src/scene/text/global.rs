@@ -13,19 +13,20 @@ pub fn get_global_font_system() -> Result<&'static Mutex<FontSystem>, ErrorCode>
         Some(font_system) => Ok(font_system),
         None => {
             let new_font_system = Mutex::new(FontSystem::new()?);
-            if let Err(_) = GLOBAL_FONT_SYSTEM.set(new_font_system) {
+            if GLOBAL_FONT_SYSTEM.set(new_font_system).is_err() {
                 error!("Failed to set the global font system");
                 return Err(ErrorCode::Unknown);
             };
             get_global_font_system()
-        },
+        }
     }
 }
 
 pub fn resize_global_font_system(new_width: f32, new_height: f32) {
     // Update font system
-    get_global_font_system().unwrap()
-        .lock().unwrap()
-        .on_resize(new_width, new_height)
-    ;
+    get_global_font_system()
+        .unwrap()
+        .lock()
+        .unwrap()
+        .on_resize(new_width, new_height);
 }

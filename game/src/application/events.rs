@@ -1,5 +1,6 @@
 use core_lib::{
-    utils::{debug::ErrorCode, time::Instant}, window::key_map::{Key, KeyState}
+    utils::{debug::ErrorCode, time::Instant},
+    window::key_map::{Key, KeyState},
 };
 use log::error;
 use winit::{
@@ -61,7 +62,7 @@ impl Application {
         }
 
         // Update game state
-        if let Err(err) = self.game_states.on_update(&self.keys, &self.delta_time){
+        if let Err(err) = self.game_states.on_update(&self.keys, &self.delta_time) {
             error!("Failed to update the game states: {:?}", err);
             return Err(ErrorCode::Unknown);
         }
@@ -86,7 +87,8 @@ impl Application {
                 // Update global keys
                 let _ = self.keys.insert(key, state);
                 // Update game states
-                self.game_states.on_keyboard_input(&self.keys, &self.last_keys, &key, &state);
+                self.game_states
+                    .on_keyboard_input(&self.keys, &self.last_keys, &key, &state);
             }
         }
     }

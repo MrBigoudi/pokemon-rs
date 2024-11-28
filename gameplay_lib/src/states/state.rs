@@ -40,7 +40,13 @@ pub trait GameState {
     fn on_resize(&mut self, new_width: f32, new_height: f32);
 
     /// Runs every frame if this is the current state
-    fn on_keyboard_input(&mut self, cur_keys: &HashMap<Key, KeyState>, old_keys: &HashMap<Key, KeyState>, new_key: &Key, new_key_state: &KeyState);
+    fn on_keyboard_input(
+        &mut self,
+        cur_keys: &HashMap<Key, KeyState>,
+        old_keys: &HashMap<Key, KeyState>,
+        new_key: &Key,
+        new_key_state: &KeyState,
+    );
 
     /// Runs every frame if the state is in the stack of states
     fn on_render(&mut self, frame_data: &mut FrameData) -> Result<(), ErrorCode>;

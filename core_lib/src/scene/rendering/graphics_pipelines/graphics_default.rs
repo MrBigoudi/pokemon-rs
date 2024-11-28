@@ -1,9 +1,7 @@
 use std::path::PathBuf;
 
 use crate::{
-    scene::{
-        geometry::vertex::Vertex, rendering::texture::Texture
-    },
+    scene::{geometry::vertex::Vertex, rendering::texture::Texture},
     utils::debug::ErrorCode,
     wgpu_context::pipelines::{
         graphics::{GraphicsPipeline, GraphicsPipelineBase},
@@ -31,15 +29,11 @@ impl DefaultGraphicsPipeline {
         shader_path.push("default");
         shader_path.set_extension("wgsl");
 
-        let base = Self::from_single_shader_path(
-            &resources,
-            &shader_path, 
-            None, 
-            "vs_main", 
-            "fs_main"
-        ).await?;
-        
-        Ok(Self { base,})
+        let base =
+            Self::from_single_shader_path(resources, &shader_path, None, "vs_main", "fs_main")
+                .await?;
+
+        Ok(Self { base })
     }
 
     fn init_bind_group_0_layout(device: &wgpu::Device) -> wgpu::BindGroupLayout {
@@ -160,13 +154,13 @@ impl GraphicsPipeline for DefaultGraphicsPipeline {
         Ok(vec![bind_group_0, bind_group_1])
     }
 
-    fn init_render_pipeline_from_multiple_modules (
+    fn init_render_pipeline_from_multiple_modules(
         vertex_shader_module: &wgpu::ShaderModule,
         fragment_shader_module: &wgpu::ShaderModule,
         vertex_entry_point: Option<&str>,
         fragment_entry_point: Option<&str>,
         bind_groups_layouts: &[&wgpu::BindGroupLayout],
-    ) -> Result<wgpu::RenderPipeline, ErrorCode>{
+    ) -> Result<wgpu::RenderPipeline, ErrorCode> {
         let global_wgpu_state = Self::get_global_wgpu_state()?;
         let device = &global_wgpu_state.device;
 
@@ -185,13 +179,13 @@ impl GraphicsPipeline for DefaultGraphicsPipeline {
             label: Some("DefaultPipeline"),
             layout: Some(&pipeline_layout),
             vertex: wgpu::VertexState {
-                module: &vertex_shader_module,
+                module: vertex_shader_module,
                 entry_point: vertex_entry_point,
                 buffers: &[Vertex::layout()], // Type of vertices passed to the vertex shader
                 compilation_options: wgpu::PipelineCompilationOptions::default(),
             },
             fragment: Some(wgpu::FragmentState {
-                module: &fragment_shader_module,
+                module: fragment_shader_module,
                 entry_point: fragment_entry_point,
                 targets: &[Some(wgpu::ColorTargetState {
                     format,
@@ -224,5 +218,4 @@ impl GraphicsPipeline for DefaultGraphicsPipeline {
 
         Ok(pipeline)
     }
-
 }

@@ -103,7 +103,12 @@ pub trait GraphicsPipeline {
                 }
             };
 
-        Self::from_single_shader_module(resources, shader_module, vertex_entry_point, fragment_entry_point)
+        Self::from_single_shader_module(
+            resources,
+            shader_module,
+            vertex_entry_point,
+            fragment_entry_point,
+        )
     }
 
     fn from_multiple_shader_modules(
@@ -174,7 +179,7 @@ pub trait GraphicsPipeline {
             }
         };
 
-        let bind_groups = match Self::init_bind_groups(&resources, &bind_groups_layouts) {
+        let bind_groups = match Self::init_bind_groups(resources, &bind_groups_layouts) {
             Ok(groups) => groups,
             Err(err) => {
                 error!(
@@ -221,14 +226,13 @@ pub trait GraphicsPipeline {
         bind_groups_layouts: &[&wgpu::BindGroupLayout],
     ) -> Result<wgpu::RenderPipeline, ErrorCode> {
         Self::init_render_pipeline_from_multiple_modules(
-            &shader_module, 
-            &shader_module, 
-            Some(vertex_entry_point), 
-            Some(fragment_entry_point), 
-            bind_groups_layouts
+            shader_module,
+            shader_module,
+            Some(vertex_entry_point),
+            Some(fragment_entry_point),
+            bind_groups_layouts,
         )
     }
-
 
     // Functions to reimplement
     fn get_base(&self) -> &GraphicsPipelineBase;
@@ -248,5 +252,4 @@ pub trait GraphicsPipeline {
         fragment_entry_point: Option<&str>,
         bind_groups_layouts: &[&wgpu::BindGroupLayout],
     ) -> Result<wgpu::RenderPipeline, ErrorCode>;
-
 }

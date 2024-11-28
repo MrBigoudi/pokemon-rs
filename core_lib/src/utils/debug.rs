@@ -11,4 +11,5 @@ pub enum ErrorCode {
     Network,
     Duplicate,
     BadValue,
+    NotFound,
 }

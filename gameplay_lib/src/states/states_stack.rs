@@ -99,7 +99,11 @@ impl GameStatesStack {
     }
 
     /// The update function runs every frame
-    pub fn on_update(&mut self, keys: &HashMap<Key, KeyState>, delta_time: &Duration) -> Result<(), ErrorCode> {
+    pub fn on_update(
+        &mut self,
+        keys: &HashMap<Key, KeyState>,
+        delta_time: &Duration,
+    ) -> Result<(), ErrorCode> {
         // Update the current state
         let current_state = self.get_current_state();
         current_state.as_mut().on_update(keys, delta_time);
@@ -111,7 +115,7 @@ impl GameStatesStack {
             if !state.should_be_swapped() {
                 break 'swap_states;
             }
-            
+
             self.pop()?;
             let state = self.dict_of_states.get(&state_type).unwrap();
             if state.should_be_removed() {
@@ -123,9 +127,17 @@ impl GameStatesStack {
     }
 
     /// The input handling function runs every frame
-    pub fn on_keyboard_input(&mut self, cur_keys: &HashMap<Key, KeyState>, old_keys: &HashMap<Key, KeyState>, new_key: &Key, new_key_state: &KeyState) {
+    pub fn on_keyboard_input(
+        &mut self,
+        cur_keys: &HashMap<Key, KeyState>,
+        old_keys: &HashMap<Key, KeyState>,
+        new_key: &Key,
+        new_key_state: &KeyState,
+    ) {
         let current_state = self.get_current_state();
-        current_state.as_mut().on_keyboard_input(cur_keys, old_keys, new_key, new_key_state);
+        current_state
+            .as_mut()
+            .on_keyboard_input(cur_keys, old_keys, new_key, new_key_state);
     }
 
     /// The resize function runs on all the states of the machine
@@ -141,7 +153,11 @@ impl GameStatesStack {
         for state_type in &self.stack_of_indices {
             let state = self.dict_of_states.get_mut(state_type).unwrap();
             if let Err(err) = state.on_render(frame_data) {
-                error!("Failed to render the state `{:?}': {:?}", state.get_type(), err);
+                error!(
+                    "Failed to render the state `{:?}': {:?}",
+                    state.get_type(),
+                    err
+                );
                 return Err(ErrorCode::Unknown);
             }
         }

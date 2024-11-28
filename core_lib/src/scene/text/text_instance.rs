@@ -3,8 +3,11 @@ use std::{ops::DerefMut, sync::Arc};
 use log::error;
 use wgpu::RenderPass;
 
-use crate::{utils::debug::ErrorCode, wgpu_context::{global::get_global_wgpu_state, state::State}};
 use super::{font::FontFamily, global::get_global_font_system};
+use crate::{
+    utils::debug::ErrorCode,
+    wgpu_context::{global::get_global_wgpu_state, state::State},
+};
 
 pub struct TextParameters {
     // Appearance paramters
@@ -12,7 +15,7 @@ pub struct TextParameters {
     pub font_size: f32,
     pub line_height: f32,
     pub font_family: FontFamily,
-    
+
     pub font_color: [u8; 4],
     // Text bounds positions
     pub bounds_left: f32,
@@ -30,10 +33,7 @@ pub struct TextInstance {
 impl TextInstance {
     pub fn new(parameters: TextParameters) -> Result<Self, ErrorCode> {
         let buffer = Self::init_buffer(&parameters)?;
-        Ok(Self {
-            parameters,
-            buffer,
-        })
+        Ok(Self { parameters, buffer })
     }
 
     pub fn update(&mut self, new_parameters: TextParameters) -> Result<(), ErrorCode> {
@@ -46,9 +46,12 @@ impl TextInstance {
         match get_global_wgpu_state() {
             Ok(state) => Ok(state),
             Err(err) => {
-                error!("Failed to get the global wgpu state in a text instance: {:?}", err);
+                error!(
+                    "Failed to get the global wgpu state in a text instance: {:?}",
+                    err
+                );
                 Err(ErrorCode::Unknown)
-            },
+            }
         }
     }
 
@@ -64,12 +67,12 @@ impl TextInstance {
                 Err(err) => {
                     error!("Failed to lock the global font system when initializing a text instance buffer: {:?}", err);
                     return Err(ErrorCode::SyncError);
-                },
+                }
             },
             Err(err) => {
                 error!("Failed to get the global font system when initializing a text instance buffer: {:?}", err);
                 return Err(ErrorCode::Unknown);
-            },
+            }
         };
         let font_system = font_system.handle.get_mut();
 
@@ -99,10 +102,10 @@ impl TextInstance {
                 bottom: self.parameters.bounds_height as i32,
             },
             default_color: glyphon::Color::rgba(
-                self.parameters.font_color[0], 
-                self.parameters.font_color[1], 
-                self.parameters.font_color[2], 
-                self.parameters.font_color[3]
+                self.parameters.font_color[0],
+                self.parameters.font_color[1],
+                self.parameters.font_color[2],
+                self.parameters.font_color[3],
             ),
             custom_glyphs: &[],
         }];
@@ -117,12 +120,12 @@ impl TextInstance {
                 Err(err) => {
                     error!("Failed to lock the global font system when initializing a text instance buffer: {:?}", err);
                     return Err(ErrorCode::SyncError);
-                },
+                }
             },
             Err(err) => {
                 error!("Failed to get the global font system when initializing a text instance buffer: {:?}", err);
                 return Err(ErrorCode::Unknown);
-            },
+            }
         };
 
         let mut text_renderer = font_system.text_renderer.borrow_mut();
@@ -132,13 +135,13 @@ impl TextInstance {
         let viewport = font_system.viewport.borrow();
 
         if let Err(err) = text_renderer.prepare(
-            device, 
+            device,
             queue,
             handle.deref_mut(),
             atlas.deref_mut(),
             &viewport,
             text_areas,
-            swash_cache.deref_mut()
+            swash_cache.deref_mut(),
         ) {
             error!("Failed to prepare the text renderer: {:?}", err);
             return Err(ErrorCode::Unknown);
@@ -150,7 +153,7 @@ impl TextInstance {
         }
 
         atlas.trim();
-        
+
         Ok(())
     }
 }

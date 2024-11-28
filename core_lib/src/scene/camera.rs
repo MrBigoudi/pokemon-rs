@@ -2,7 +2,6 @@ use crate::utils::time::Duration;
 
 use super::animation::movement::MovementDirection;
 
-
 #[derive(Debug, Default)]
 pub enum ProjectionType {
     #[default]
@@ -78,19 +77,19 @@ impl Camera {
             MovementDirection::Forward => {
                 self.eye += speed * forward_direction;
                 self.target += speed * forward_direction;
-            },
+            }
             MovementDirection::Backward => {
                 self.eye -= speed * forward_direction;
                 self.target -= speed * forward_direction;
-            },
+            }
             MovementDirection::Left => {
                 self.eye -= speed * right_direction;
                 self.target -= speed * right_direction;
-            },
+            }
             MovementDirection::Right => {
                 self.eye += speed * right_direction;
                 self.target += speed * right_direction;
-            },
+            }
         }
     }
 }

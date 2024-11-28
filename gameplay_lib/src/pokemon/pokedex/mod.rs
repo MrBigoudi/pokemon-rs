@@ -15,6 +15,7 @@ use std::{collections::HashMap, path::PathBuf, sync::Arc};
 
 pub type Id = u16;
 
+#[derive(Debug)]
 #[non_exhaustive]
 pub struct Pokedex {
     pub data: HashMap<Id, PokedexEntry>,
@@ -41,10 +42,52 @@ impl Pokedex {
         };
         let mut data: HashMap<Id, PokedexEntry> = Default::default();
 
-        // 0001 - Bulbasaur
-        let bulbasaur_id = 1 as Id;
-        let bulbasaur_entry = PokedexEntry::from_toml(&toml, "bulbasaur", bulbasaur_id)?;
-        data.insert(bulbasaur_id, bulbasaur_entry);
+        let pokedex_array = match toml["pokedex"].as_array() {
+            Some(pokedex_array) => pokedex_array,
+            None => {
+                error!("Failed to read the pokedex from the Pokedex's toml");
+                return Err(ErrorCode::NotFound);
+            }
+        };
+
+        for (id, value) in pokedex_array.iter().enumerate() {
+            let (name, table) = match value.as_table() {
+                Some(table) => {
+                    let name = table.keys().collect::<Vec<&String>>()[0];
+                    let table = match table[name].as_table() {
+                        Some(entry) => entry,
+                        None => {
+                            error!(
+                                "Failed to get the pokedex entry for the pokemon entry #{}",
+                                format!("{:0>4}", id + 1),
+                            );
+                            return Err(ErrorCode::Unknown);
+                        }
+                    };
+                    (name, table)
+                }
+                None => {
+                    error!(
+                        "Failed to get the table for the pokemon entry #{}",
+                        format!("{:0>4}", id + 1),
+                    );
+                    return Err(ErrorCode::Unknown);
+                }
+            };
+            let new_pokemon = match PokedexEntry::from_toml(table) {
+                Ok(new_pokemon) => new_pokemon,
+                Err(err) => {
+                    error!(
+                        "Failed to create the pokedex entry for pokemon #{}, {}: {:?}",
+                        format!("{:0>4}", id + 1),
+                        name,
+                        err
+                    );
+                    return Err(ErrorCode::Unknown);
+                }
+            };
+            data.insert(new_pokemon.pokedex_number, new_pokemon);
+        }
 
         Ok(Self { data })
     }

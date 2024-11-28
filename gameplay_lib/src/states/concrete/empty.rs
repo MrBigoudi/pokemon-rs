@@ -22,7 +22,14 @@ impl GameState for GameStateEmpty {
 
     fn on_enter(&mut self) {}
 
-    fn on_keyboard_input(&mut self, _cur_keys: &HashMap<Key, KeyState>, _old_keys: &HashMap<Key, KeyState>, _new_key: &Key, _new_key_state: &KeyState) {}
+    fn on_keyboard_input(
+        &mut self,
+        _cur_keys: &HashMap<Key, KeyState>,
+        _old_keys: &HashMap<Key, KeyState>,
+        _new_key: &Key,
+        _new_key_state: &KeyState,
+    ) {
+    }
 
     fn on_render(&mut self, frame_data: &mut FrameData) -> Result<(), ErrorCode> {
         // Draw the background
@@ -58,11 +65,11 @@ impl GameState for GameStateEmpty {
     }
 
     fn on_resize(&mut self, _new_width: f32, _new_height: f32) {}
-    
+
     fn should_be_swapped(&self) -> bool {
         false
     }
-    
+
     fn should_be_removed(&self) -> bool {
         false
     }

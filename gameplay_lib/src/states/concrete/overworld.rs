@@ -2,9 +2,17 @@ use std::{collections::HashMap, path::PathBuf};
 
 use core_lib::{
     scene::{
-        animation::movement::MovementDirection, camera::{Camera, ProjectionType}, geometry::vertex::{RECTANGLE_INDICES, RECTANGLE_VERTICES}, rendering::{
-            frame::FrameData, graphics_pipelines::graphics_default::{DefaultGraphicsPipeline, DefaultGraphicsPipelineResources}, texture::Texture,
-        }, Scene
+        animation::movement::MovementDirection,
+        camera::{Camera, ProjectionType},
+        geometry::vertex::{RECTANGLE_INDICES, RECTANGLE_VERTICES},
+        rendering::{
+            frame::FrameData,
+            graphics_pipelines::graphics_default::{
+                DefaultGraphicsPipeline, DefaultGraphicsPipelineResources,
+            },
+            texture::Texture,
+        },
+        Scene,
     },
     utils::{debug::ErrorCode, time::Duration},
     wgpu_context::global::get_global_wgpu_state,
@@ -47,28 +55,26 @@ impl GameStateOverworld {
 
     fn init_scene(viewport_width: f32, viewport_height: f32) -> Scene {
         let camera = Camera::new(viewport_width, viewport_height);
-        Scene {
-            camera
-        }
+        Scene { camera }
     }
 
     fn update_camera_buffer(&self) {
         let queue = &get_global_wgpu_state().unwrap().queue;
-        
+
         let buffer_to_update = &self.graphics_pipeline_resources.camera_buffer;
         let offset = 0;
 
         let new_data = [self.scene.camera.to_camera_gpu(ProjectionType::Perspective)];
         let new_data = bytemuck::cast_slice(&new_data);
-        
-        queue.write_buffer(
-            buffer_to_update,
-            offset,
-            new_data,
-        );
+
+        queue.write_buffer(buffer_to_update, offset, new_data);
     }
 
-    fn init_graphics_pipeline_resources(scene: &Scene, device: &wgpu::Device, queue: &wgpu::Queue) -> DefaultGraphicsPipelineResources {
+    fn init_graphics_pipeline_resources(
+        scene: &Scene,
+        device: &wgpu::Device,
+        queue: &wgpu::Queue,
+    ) -> DefaultGraphicsPipelineResources {
         // TODO: Update this
         let mut diffuse_texture_path = PathBuf::from("");
         diffuse_texture_path.push("assets");
@@ -81,11 +87,10 @@ impl GameStateOverworld {
         // Init the camera buffer
         let camera_gpu = scene.camera.to_camera_gpu(ProjectionType::Perspective);
         let camera_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-                label: None,
-                contents: bytemuck::cast_slice(&[camera_gpu]),
-                usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
-            }
-        );
+            label: None,
+            contents: bytemuck::cast_slice(&[camera_gpu]),
+            usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
+        });
 
         // Init the diffuse texture
         let diffuse_texture = pollster::block_on(Texture::from_path(
@@ -93,15 +98,18 @@ impl GameStateOverworld {
             device,
             queue,
             None,
-        )).unwrap();
+        ))
+        .unwrap();
 
         DefaultGraphicsPipelineResources {
             camera_buffer,
-            diffuse_texture
+            diffuse_texture,
         }
     }
 
-    fn init_graphics_pipeline(resources: &DefaultGraphicsPipelineResources) -> DefaultGraphicsPipeline {  
+    fn init_graphics_pipeline(
+        resources: &DefaultGraphicsPipelineResources,
+    ) -> DefaultGraphicsPipeline {
         pollster::block_on(DefaultGraphicsPipeline::new(resources)).unwrap()
     }
 }
@@ -115,7 +123,8 @@ impl Default for GameStateOverworld {
         let viewport_width = size.lock().unwrap().width as f32;
         let viewport_height = size.lock().unwrap().height as f32;
         let scene = Self::init_scene(viewport_width, viewport_height);
-        let graphics_pipeline_resources = Self::init_graphics_pipeline_resources(&scene, device, queue);
+        let graphics_pipeline_resources =
+            Self::init_graphics_pipeline_resources(&scene, device, queue);
         let graphics_pipeline = Self::init_graphics_pipeline(&graphics_pipeline_resources);
         let vertex_buffer = Self::init_vertex_buffer(device);
         let index_buffer = Self::init_index_buffer(device);
@@ -140,16 +149,24 @@ impl GameState for GameStateOverworld {
         self.delta_time = *delta_time;
 
         if let Some(KeyState::Pressed) = keys.get(&Key::W) {
-            self.scene.camera.on_move(MovementDirection::Forward, self.delta_time);
+            self.scene
+                .camera
+                .on_move(MovementDirection::Forward, self.delta_time);
         }
-        if let Some(KeyState::Pressed) = keys.get(&Key::A)  {
-            self.scene.camera.on_move(MovementDirection::Left, self.delta_time);
+        if let Some(KeyState::Pressed) = keys.get(&Key::A) {
+            self.scene
+                .camera
+                .on_move(MovementDirection::Left, self.delta_time);
         }
-        if let Some(KeyState::Pressed) = keys.get(&Key::S)  {
-            self.scene.camera.on_move(MovementDirection::Backward, self.delta_time);
+        if let Some(KeyState::Pressed) = keys.get(&Key::S) {
+            self.scene
+                .camera
+                .on_move(MovementDirection::Backward, self.delta_time);
         }
-        if let Some(KeyState::Pressed) = keys.get(&Key::D)  {
-            self.scene.camera.on_move(MovementDirection::Right, self.delta_time);
+        if let Some(KeyState::Pressed) = keys.get(&Key::D) {
+            self.scene
+                .camera
+                .on_move(MovementDirection::Right, self.delta_time);
         }
 
         self.update_camera_buffer();
@@ -159,7 +176,13 @@ impl GameState for GameStateOverworld {
 
     fn on_enter(&mut self) {}
 
-    fn on_keyboard_input(&mut self, _cur_keys: &HashMap<Key, KeyState>, _old_keys: &HashMap<Key, KeyState>, _new_key: &Key, _new_key_state: &KeyState) {
+    fn on_keyboard_input(
+        &mut self,
+        _cur_keys: &HashMap<Key, KeyState>,
+        _old_keys: &HashMap<Key, KeyState>,
+        _new_key: &Key,
+        _new_key_state: &KeyState,
+    ) {
     }
 
     fn on_render(&mut self, frame_data: &mut FrameData) -> Result<(), ErrorCode> {
@@ -210,11 +233,11 @@ impl GameState for GameStateOverworld {
         self.scene.on_resize(new_width, new_height);
         self.update_camera_buffer();
     }
-    
+
     fn should_be_swapped(&self) -> bool {
         false
     }
-    
+
     fn should_be_removed(&self) -> bool {
         false
     }

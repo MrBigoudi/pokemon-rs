@@ -121,17 +121,21 @@ impl Application {
         if let Err(err) = game_states.add(Box::new(
             gameplay_lib::states::concrete::overworld_dialog::GameStateOverworldDialog::new()?,
         )) {
-            error!("Failed to create the overworld dialog game state: {:?}", err);
+            error!(
+                "Failed to create the overworld dialog game state: {:?}",
+                err
+            );
             return Err(ErrorCode::Unknown);
         }
-
 
         // TODO: remove this
         if let Err(err) = game_states.push(gameplay_lib::states::state::GameStateType::Overworld) {
             error!("Failed to push the overworld game state: {:?}", err);
             return Err(ErrorCode::Unknown);
         }
-        if let Err(err) = game_states.push(gameplay_lib::states::state::GameStateType::OverworldDialog) {
+        if let Err(err) =
+            game_states.push(gameplay_lib::states::state::GameStateType::OverworldDialog)
+        {
             error!("Failed to push the overworld dialog game state: {:?}", err);
             return Err(ErrorCode::Unknown);
         }

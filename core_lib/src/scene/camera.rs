@@ -33,7 +33,7 @@ impl Camera {
 
         let aspect_ratio = width / height;
 
-        let speed = 0.03;
+        let speed = 0.001;
 
         Camera {
             eye,

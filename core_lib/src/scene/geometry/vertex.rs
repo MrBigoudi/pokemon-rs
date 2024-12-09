@@ -1,8 +1,8 @@
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
 pub struct Vertex {
-    position: glam::Vec3,
-    tex_coords: glam::Vec2,
+    pub position: glam::Vec3,
+    pub tex_coords: glam::Vec2,
 }
 
 unsafe impl bytemuck::Pod for Vertex {}
@@ -21,70 +21,78 @@ impl Vertex {
             attributes: &Self::ATTRIBS,
         }
     }
+
+    pub fn triangle_vertices() -> Vec<Vertex> {
+        vec![
+            Vertex {
+                position: glam::Vec3 {
+                    x: 0.,
+                    y: 0.5,
+                    z: 0.,
+                },
+                tex_coords: glam::Vec2 { x: 0.5, y: 0. },
+            },
+            Vertex {
+                position: glam::Vec3 {
+                    x: -0.5,
+                    y: -0.5,
+                    z: 0.,
+                },
+                tex_coords: glam::Vec2 { x: 0., y: 1. },
+            },
+            Vertex {
+                position: glam::Vec3 {
+                    x: 0.5,
+                    y: -0.5,
+                    z: 0.,
+                },
+                tex_coords: glam::Vec2 { x: 1., y: 1. },
+            },
+        ]
+    }
+
+    pub fn triangle_indices() -> Vec<u16>{
+        vec![0,1,2]
+    }
+
+    pub fn rectangle_vertices() -> Vec<Vertex> {
+        vec![
+            Vertex {
+                position: glam::Vec3 {
+                    x: -0.5,
+                    y: 0.5,
+                    z: 0.,
+                },
+                tex_coords: glam::Vec2 { x: 0., y: 0. },
+            },
+            Vertex {
+                position: glam::Vec3 {
+                    x: -0.5,
+                    y: -0.5,
+                    z: 0.,
+                },
+                tex_coords: glam::Vec2 { x: 0., y: 1. },
+            },
+            Vertex {
+                position: glam::Vec3 {
+                    x: 0.5,
+                    y: 0.5,
+                    z: 0.,
+                },
+                tex_coords: glam::Vec2 { x: 1., y: 0. },
+            },
+            Vertex {
+                position: glam::Vec3 {
+                    x: 0.5,
+                    y: -0.5,
+                    z: 0.,
+                },
+                tex_coords: glam::Vec2 { x: 1., y: 1. },
+            },
+        ]
+    }
+
+    pub fn rectangle_indices() -> Vec<u16>{
+        vec![0, 1, 2, 2, 1, 3]
+    }
 }
-
-pub const TRIANGLE_VERTICES: &[Vertex] = &[
-    Vertex {
-        position: glam::Vec3 {
-            x: 0.,
-            y: 0.5,
-            z: 0.,
-        },
-        tex_coords: glam::Vec2 { x: 0.5, y: 0. },
-    },
-    Vertex {
-        position: glam::Vec3 {
-            x: -0.5,
-            y: -0.5,
-            z: 0.,
-        },
-        tex_coords: glam::Vec2 { x: 0., y: 1. },
-    },
-    Vertex {
-        position: glam::Vec3 {
-            x: 0.5,
-            y: -0.5,
-            z: 0.,
-        },
-        tex_coords: glam::Vec2 { x: 1., y: 1. },
-    },
-];
-
-pub const TRIANGLE_INDICES: &[u16] = &[0, 1, 2];
-
-pub const RECTANGLE_VERTICES: &[Vertex] = &[
-    Vertex {
-        position: glam::Vec3 {
-            x: -0.5,
-            y: 0.5,
-            z: 0.,
-        },
-        tex_coords: glam::Vec2 { x: 0., y: 0. },
-    },
-    Vertex {
-        position: glam::Vec3 {
-            x: -0.5,
-            y: -0.5,
-            z: 0.,
-        },
-        tex_coords: glam::Vec2 { x: 0., y: 1. },
-    },
-    Vertex {
-        position: glam::Vec3 {
-            x: 0.5,
-            y: 0.5,
-            z: 0.,
-        },
-        tex_coords: glam::Vec2 { x: 1., y: 0. },
-    },
-    Vertex {
-        position: glam::Vec3 {
-            x: 0.5,
-            y: -0.5,
-            z: 0.,
-        },
-        tex_coords: glam::Vec2 { x: 1., y: 1. },
-    },
-];
-
-pub const RECTANGLE_INDICES: &[u16] = &[0, 1, 2, 2, 1, 3];

@@ -1,18 +1,13 @@
-use std::{collections::HashMap, path::PathBuf};
+use std::collections::HashMap;
 
 use core_lib::{
     scene::{
-        animation::movement::MovementDirection,
-        camera::{Camera, ProjectionType},
-        geometry::vertex::{RECTANGLE_INDICES, RECTANGLE_VERTICES},
-        rendering::{
+        animation::movement::MovementDirection, camera::{Camera, ProjectionType}, geometry::vertex::Vertex, rendering::{
             frame::FrameData,
             graphics_pipelines::graphics_default::{
                 DefaultGraphicsPipeline, DefaultGraphicsPipelineResources,
             },
-            texture::Texture,
-        },
-        Scene,
+        }, Scene
     },
     utils::{debug::ErrorCode, time::Duration},
     wgpu_context::global::get_global_wgpu_state,
@@ -20,7 +15,7 @@ use core_lib::{
     DeviceExt,
 };
 
-use crate::states::state::{GameState, GameStateType};
+use crate::{character::player::Player, states::state::{GameState, GameStateType}};
 
 pub struct GameStateOverworld {
     // Graphics pipeline and associated resources
@@ -32,22 +27,33 @@ pub struct GameStateOverworld {
 
     pub scene: Scene,
     pub delta_time: Duration,
+
+    pub player: Player,
 }
 
 impl GameStateOverworld {
-    fn init_vertex_buffer(device: &wgpu::Device) -> wgpu::Buffer {
+    fn init_player() -> Player {
+        Player::new()
+    }
+
+    fn init_vertex_buffer(device: &wgpu::Device, player: &Player) -> wgpu::Buffer {
         let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("TriangleVertexBuffer"),
-            contents: bytemuck::cast_slice(RECTANGLE_VERTICES),
+            contents: bytemuck::cast_slice(&player.get_vertices()),
             usage: wgpu::BufferUsages::VERTEX,
         });
         vertex_buffer
     }
 
-    fn init_index_buffer(device: &wgpu::Device) -> wgpu::Buffer {
+    fn update_vertex_buffer(&mut self, device: &wgpu::Device) {
+        let new_vertex_buffer = Self::init_vertex_buffer(device, &self.player);
+        self.vertex_buffer = new_vertex_buffer;
+    }
+
+    fn init_index_buffer(device: &wgpu::Device, player: &Player) -> wgpu::Buffer {
         let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("TriangleIndexBuffer"),
-            contents: bytemuck::cast_slice(RECTANGLE_INDICES),
+            contents: bytemuck::cast_slice(&player.get_indices()),
             usage: wgpu::BufferUsages::INDEX,
         });
         vertex_buffer
@@ -75,15 +81,6 @@ impl GameStateOverworld {
         device: &wgpu::Device,
         queue: &wgpu::Queue,
     ) -> DefaultGraphicsPipelineResources {
-        // TODO: Update this
-        let mut diffuse_texture_path = PathBuf::from("");
-        diffuse_texture_path.push("assets");
-        diffuse_texture_path.push("sprites");
-        diffuse_texture_path.push("pokemons");
-        diffuse_texture_path.push("bulbasaur");
-        diffuse_texture_path.push("front");
-        diffuse_texture_path.set_extension("png");
-
         // Init the camera buffer
         let camera_gpu = scene.camera.to_camera_gpu(ProjectionType::Perspective);
         let camera_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
@@ -93,13 +90,7 @@ impl GameStateOverworld {
         });
 
         // Init the diffuse texture
-        let diffuse_texture = pollster::block_on(Texture::from_path(
-            &diffuse_texture_path,
-            device,
-            queue,
-            None,
-        ))
-        .unwrap();
+        let diffuse_texture = Player::get_texture(device, queue);
 
         DefaultGraphicsPipelineResources {
             camera_buffer,
@@ -123,11 +114,15 @@ impl Default for GameStateOverworld {
         let viewport_width = size.lock().unwrap().width as f32;
         let viewport_height = size.lock().unwrap().height as f32;
         let scene = Self::init_scene(viewport_width, viewport_height);
+        let player = Self::init_player();
+
         let graphics_pipeline_resources =
             Self::init_graphics_pipeline_resources(&scene, device, queue);
         let graphics_pipeline = Self::init_graphics_pipeline(&graphics_pipeline_resources);
-        let vertex_buffer = Self::init_vertex_buffer(device);
-        let index_buffer = Self::init_index_buffer(device);
+
+        let vertex_buffer = Self::init_vertex_buffer(device, &player);
+        let index_buffer = Self::init_index_buffer(device, &player);
+
 
         Self {
             graphics_pipeline,
@@ -136,6 +131,7 @@ impl Default for GameStateOverworld {
             index_buffer,
             scene,
             delta_time: Default::default(),
+            player,
         }
     }
 }
@@ -147,28 +143,41 @@ impl GameState for GameStateOverworld {
 
     fn on_update(&mut self, keys: &HashMap<Key, KeyState>, delta_time: &Duration) {
         self.delta_time = *delta_time;
+        let device = &get_global_wgpu_state().unwrap().device;
 
-        if let Some(KeyState::Pressed) = keys.get(&Key::W) {
-            self.scene
-                .camera
-                .on_move(MovementDirection::Forward, self.delta_time);
-        }
-        if let Some(KeyState::Pressed) = keys.get(&Key::A) {
-            self.scene
-                .camera
-                .on_move(MovementDirection::Left, self.delta_time);
-        }
+        // Update camera
         if let Some(KeyState::Pressed) = keys.get(&Key::S) {
             self.scene
                 .camera
-                .on_move(MovementDirection::Backward, self.delta_time);
+                .on_move(MovementDirection::Forward, self.delta_time);
+            // Update player state
+            self.player.on_move(MovementDirection::Backward);
+            self.update_vertex_buffer(device);
         }
         if let Some(KeyState::Pressed) = keys.get(&Key::D) {
             self.scene
                 .camera
-                .on_move(MovementDirection::Right, self.delta_time);
+                .on_move(MovementDirection::Left, self.delta_time);
+            // Update player state
+            self.player.on_move(MovementDirection::Right);
+            self.update_vertex_buffer(device);
         }
-
+        if let Some(KeyState::Pressed) = keys.get(&Key::W) {
+            self.scene
+                .camera
+                .on_move(MovementDirection::Backward, self.delta_time);
+            // Update player state
+            self.player.on_move(MovementDirection::Forward);
+            self.update_vertex_buffer(device);
+        }
+        if let Some(KeyState::Pressed) = keys.get(&Key::A) {
+            self.scene
+                .camera
+                .on_move(MovementDirection::Right, self.delta_time);
+            // Update player state
+            self.player.on_move(MovementDirection::Left);
+            self.update_vertex_buffer(device);
+        }
         self.update_camera_buffer();
     }
 
@@ -223,7 +232,7 @@ impl GameState for GameStateOverworld {
         render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..)); // .. to use the entire buffer
         render_pass.set_index_buffer(self.index_buffer.slice(..), wgpu::IndexFormat::Uint16); // .. to use the entire buffer
 
-        let num_indices = RECTANGLE_INDICES.len() as u32;
+        let num_indices = Vertex::rectangle_indices().len() as u32;
         render_pass.draw_indexed(0..num_indices, 0, 0..1);
 
         Ok(())

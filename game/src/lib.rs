@@ -52,8 +52,8 @@ pub fn run() {
     }
 
     // TODO: Remove this test code
-    let pokedex = gameplay_lib::pokemon::pokedex::get_global_pokedex().unwrap();
-    panic!("Pokedex: {:?}", pokedex);
+    // let pokedex = gameplay_lib::pokemon::pokedex::get_global_pokedex().unwrap();
+    // panic!("Pokedex: {:?}", pokedex);
 
     // Run the app
     let parameters = core_lib::utils::config::ApplicationParameters::default();

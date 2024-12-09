@@ -43,20 +43,31 @@ impl Application {
             return Err(ErrorCode::Wgpu);
         }
 
-        self.game_states
-            .on_resize(new_size.width as f32, new_size.height as f32);
+        let new_width = new_size.width as f32;
+        let new_height = new_size.height as f32;
+
+        // Update game states
+        self.game_states.on_resize(new_width, new_height);
 
         Ok(())
     }
 
-    pub fn on_update(&mut self) {
-        // Update delta time
+    pub fn on_update(&mut self) -> Result<(), ErrorCode> {
+        // Update delta time and cap the frame rate
         let now = Instant::now();
         self.delta_time = now - self.last_frame;
         self.last_frame = now;
+        if self.delta_time < self.target_frame_time {
+            Instant::sleep(self.target_frame_time - self.delta_time);
+        }
 
         // Update game state
-        self.game_states.on_update(&self.keys, &self.delta_time);
+        if let Err(err) = self.game_states.on_update(&self.keys, &self.delta_time) {
+            error!("Failed to update the game states: {:?}", err);
+            return Err(ErrorCode::Unknown);
+        }
+
+        Ok(())
     }
 
     pub fn on_keyboard_input(
@@ -76,7 +87,8 @@ impl Application {
                 // Update global keys
                 let _ = self.keys.insert(key, state);
                 // Update game states
-                self.game_states.on_keyboard_input(&self.keys, &self.last_keys, &key, &state);
+                self.game_states
+                    .on_keyboard_input(&self.keys, &self.last_keys, &key, &state);
             }
         }
     }

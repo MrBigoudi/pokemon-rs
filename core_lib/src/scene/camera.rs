@@ -1,3 +1,7 @@
+use crate::utils::time::Duration;
+
+use super::animation::movement::MovementDirection;
+
 #[derive(Debug, Default)]
 pub enum ProjectionType {
     #[default]
@@ -14,6 +18,7 @@ pub struct Camera {
     pub fov_y_radians: f32,
     pub z_near: f32,
     pub z_far: f32,
+    pub speed: f32,
 }
 
 impl Camera {
@@ -28,6 +33,8 @@ impl Camera {
 
         let aspect_ratio = width / height;
 
+        let speed = 0.001;
+
         Camera {
             eye,
             target,
@@ -36,6 +43,7 @@ impl Camera {
             fov_y_radians,
             z_near,
             z_far,
+            speed,
         }
     }
 
@@ -59,6 +67,30 @@ impl Camera {
             ProjectionType::Orthographic => todo!("Implement orthographic projections"),
         };
         CameraGPU { view, proj }
+    }
+
+    pub fn on_move(&mut self, movement: MovementDirection, delta_time: Duration) {
+        let forward_direction = (self.target - self.eye).normalize();
+        let right_direction = forward_direction.cross(self.up).normalize();
+        let speed = self.speed * delta_time as f32;
+        match movement {
+            MovementDirection::Forward => {
+                self.eye += speed * forward_direction;
+                self.target += speed * forward_direction;
+            }
+            MovementDirection::Backward => {
+                self.eye -= speed * forward_direction;
+                self.target -= speed * forward_direction;
+            }
+            MovementDirection::Left => {
+                self.eye -= speed * right_direction;
+                self.target -= speed * right_direction;
+            }
+            MovementDirection::Right => {
+                self.eye += speed * right_direction;
+                self.target += speed * right_direction;
+            }
+        }
     }
 }
 

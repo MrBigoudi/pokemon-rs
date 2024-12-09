@@ -19,10 +19,6 @@ pub trait GraphicsPipeline {
     type Resources: PipelineResources;
     type Pipeline: GraphicsPipeline;
 
-    fn get_resources(&self) -> &Self::Resources;
-    fn get_base(&self) -> &GraphicsPipelineBase;
-    fn set_base(&mut self, base: GraphicsPipelineBase);
-
     fn get_global_wgpu_state() -> Result<Arc<State>, ErrorCode> {
         match global::get_global_wgpu_state() {
             Ok(state) => Ok(state),
@@ -38,11 +34,12 @@ pub trait GraphicsPipeline {
 
     #[allow(async_fn_in_trait)]
     async fn from_multiple_shader_paths(
+        resources: &Self::Resources,
         vertex_shader_path: &Path,
         fragment_shader_path: &Path,
         vertex_label: Option<&str>,
         fragment_label: Option<&str>,
-    ) -> Result<(Self::Resources, GraphicsPipelineBase), ErrorCode> {
+    ) -> Result<GraphicsPipelineBase, ErrorCode> {
         let global_wgpu_state = Self::get_global_wgpu_state()?;
 
         let vertex_module = match Shader::get_shader_module(
@@ -79,16 +76,17 @@ pub trait GraphicsPipeline {
             }
         };
 
-        Self::from_multiple_shader_modules(vertex_module, fragment_module).await
+        Self::from_multiple_shader_modules(resources, vertex_module, fragment_module)
     }
 
     #[allow(async_fn_in_trait)]
     async fn from_single_shader_path(
+        resources: &Self::Resources,
         shader_path: &Path,
         shader_label: Option<&str>,
         vertex_entry_point: &str,
         fragment_entry_point: &str,
-    ) -> Result<(Self::Resources, GraphicsPipelineBase), ErrorCode> {
+    ) -> Result<GraphicsPipelineBase, ErrorCode> {
         let global_wgpu_state = Self::get_global_wgpu_state()?;
 
         let shader_module =
@@ -105,26 +103,19 @@ pub trait GraphicsPipeline {
                 }
             };
 
-        Self::from_single_shader_module(shader_module, vertex_entry_point, fragment_entry_point)
-            .await
+        Self::from_single_shader_module(
+            resources,
+            shader_module,
+            vertex_entry_point,
+            fragment_entry_point,
+        )
     }
 
-    #[allow(async_fn_in_trait)]
-    async fn from_multiple_shader_modules(
+    fn from_multiple_shader_modules(
+        resources: &Self::Resources,
         vertex_shader_module: wgpu::ShaderModule,
         fragment_shader_module: wgpu::ShaderModule,
-    ) -> Result<(Self::Resources, GraphicsPipelineBase), ErrorCode> {
-        let resources = match Self::init_resources().await {
-            Ok(resources) => resources,
-            Err(err) => {
-                error!(
-                    "Failed to init the resources when creating a graphics pipeline: {:?}",
-                    err
-                );
-                return Err(ErrorCode::Unknown);
-            }
-        };
-
+    ) -> Result<GraphicsPipelineBase, ErrorCode> {
         let bind_groups_layouts = match Self::init_bind_groups_layouts() {
             Ok(layouts) => layouts,
             Err(err) => {
@@ -133,7 +124,7 @@ pub trait GraphicsPipeline {
             }
         };
 
-        let bind_groups = match Self::init_bind_groups(&resources, &bind_groups_layouts) {
+        let bind_groups = match Self::init_bind_groups(resources, &bind_groups_layouts) {
             Ok(groups) => groups,
             Err(err) => {
                 error!(
@@ -149,8 +140,10 @@ pub trait GraphicsPipeline {
             group_layouts.push(group_layout);
         }
         let render_pipeline = match Self::init_render_pipeline_from_multiple_modules(
-            vertex_shader_module,
-            fragment_shader_module,
+            &vertex_shader_module,
+            &fragment_shader_module,
+            None,
+            None,
             &group_layouts,
         ) {
             Ok(groups) => groups,
@@ -169,26 +162,15 @@ pub trait GraphicsPipeline {
             bind_groups_layouts,
         };
 
-        Ok((resources, base))
+        Ok(base)
     }
 
-    #[allow(async_fn_in_trait)]
-    async fn from_single_shader_module(
+    fn from_single_shader_module(
+        resources: &Self::Resources,
         shader_module: wgpu::ShaderModule,
         vertex_entry_point: &str,
         fragment_entry_point: &str,
-    ) -> Result<(Self::Resources, GraphicsPipelineBase), ErrorCode> {
-        let resources = match Self::init_resources().await {
-            Ok(resources) => resources,
-            Err(err) => {
-                error!(
-                    "Failed to init the resources when creating a graphics pipeline: {:?}",
-                    err
-                );
-                return Err(ErrorCode::Unknown);
-            }
-        };
-
+    ) -> Result<GraphicsPipelineBase, ErrorCode> {
         let bind_groups_layouts = match Self::init_bind_groups_layouts() {
             Ok(layouts) => layouts,
             Err(err) => {
@@ -197,7 +179,7 @@ pub trait GraphicsPipeline {
             }
         };
 
-        let bind_groups = match Self::init_bind_groups(&resources, &bind_groups_layouts) {
+        let bind_groups = match Self::init_bind_groups(resources, &bind_groups_layouts) {
             Ok(groups) => groups,
             Err(err) => {
                 error!(
@@ -213,7 +195,7 @@ pub trait GraphicsPipeline {
             group_layouts.push(group_layout);
         }
         let render_pipeline = match Self::init_render_pipeline_from_single_module(
-            shader_module,
+            &shader_module,
             vertex_entry_point,
             fragment_entry_point,
             &group_layouts,
@@ -234,25 +216,40 @@ pub trait GraphicsPipeline {
             bind_groups_layouts,
         };
 
-        Ok((resources, base))
+        Ok(base)
     }
 
-    #[allow(async_fn_in_trait)]
-    async fn init_resources() -> Result<Self::Resources, ErrorCode>;
+    fn init_render_pipeline_from_single_module(
+        shader_module: &wgpu::ShaderModule,
+        vertex_entry_point: &str,
+        fragment_entry_point: &str,
+        bind_groups_layouts: &[&wgpu::BindGroupLayout],
+    ) -> Result<wgpu::RenderPipeline, ErrorCode> {
+        Self::init_render_pipeline_from_multiple_modules(
+            shader_module,
+            shader_module,
+            Some(vertex_entry_point),
+            Some(fragment_entry_point),
+            bind_groups_layouts,
+        )
+    }
+
+    // Functions to reimplement
+    fn get_base(&self) -> &GraphicsPipelineBase;
+    fn set_base(&mut self, base: GraphicsPipelineBase);
+
     fn init_bind_groups_layouts() -> Result<Vec<wgpu::BindGroupLayout>, ErrorCode>;
+
     fn init_bind_groups(
         resources: &Self::Resources,
         bind_groups_layouts: &[wgpu::BindGroupLayout],
     ) -> Result<Vec<wgpu::BindGroup>, ErrorCode>;
+
     fn init_render_pipeline_from_multiple_modules(
-        vertex_shader_module: wgpu::ShaderModule,
-        fragment_shader_module: wgpu::ShaderModule,
-        bind_groups_layouts: &[&wgpu::BindGroupLayout],
-    ) -> Result<wgpu::RenderPipeline, ErrorCode>;
-    fn init_render_pipeline_from_single_module(
-        shader_module: wgpu::ShaderModule,
-        vertex_entry_point: &str,
-        fragment_entry_point: &str,
+        vertex_shader_module: &wgpu::ShaderModule,
+        fragment_shader_module: &wgpu::ShaderModule,
+        vertex_entry_point: Option<&str>,
+        fragment_entry_point: Option<&str>,
         bind_groups_layouts: &[&wgpu::BindGroupLayout],
     ) -> Result<wgpu::RenderPipeline, ErrorCode>;
 }

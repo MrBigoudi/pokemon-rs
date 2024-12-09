@@ -1,3 +1,7 @@
+use names::Name;
+
+pub mod names;
+
 pub enum MoveType {
     Special,
     Physique,
@@ -5,7 +9,7 @@ pub enum MoveType {
 }
 
 pub struct Move {
-    pub name: &'static str,
+    pub name: Name,
     pub move_type: MoveType,
 
     pub power_points: u8,

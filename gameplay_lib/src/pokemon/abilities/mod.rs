@@ -1,1 +1,1 @@
-pub struct Ability {}
+pub mod names;

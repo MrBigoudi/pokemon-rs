@@ -10,15 +10,20 @@ use core_lib::{
 pub enum GameStateType {
     #[default]
     Empty,
-    // TODO: Remove this
-    Test,
-    // TODO: Add other types of game state
+    Overworld,
     OverworldDialog,
+    // TODO: Add other types of game state
 }
 
 /// A game state used in the states stack
 /// @see GameStatesStack
 pub trait GameState {
+    /// Tells if the state need to be swapped out
+    fn should_be_swapped(&self) -> bool;
+
+    /// Tells if the state should be removed forever
+    fn should_be_removed(&self) -> bool;
+
     /// Accessor to the type of game state
     fn get_type(&self) -> GameStateType;
 
@@ -35,7 +40,13 @@ pub trait GameState {
     fn on_resize(&mut self, new_width: f32, new_height: f32);
 
     /// Runs every frame if this is the current state
-    fn on_keyboard_input(&mut self, cur_keys: &HashMap<Key, KeyState>, old_keys: &HashMap<Key, KeyState>, new_key: &Key, new_key_state: &KeyState);
+    fn on_keyboard_input(
+        &mut self,
+        cur_keys: &HashMap<Key, KeyState>,
+        old_keys: &HashMap<Key, KeyState>,
+        new_key: &Key,
+        new_key_state: &KeyState,
+    );
 
     /// Runs every frame if the state is in the stack of states
     fn on_render(&mut self, frame_data: &mut FrameData) -> Result<(), ErrorCode>;

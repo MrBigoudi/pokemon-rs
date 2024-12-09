@@ -1,7 +1,6 @@
-use abilities::Ability;
-
 use moves::Move;
 use pokedex::entry::PokedexEntry;
+use stats::Stats;
 
 pub mod abilities;
 pub mod egg;
@@ -19,7 +18,7 @@ pub struct Pokemon {
     pub nickname: String,
     pub id: Id,
 
-    pub ability: &'static Ability,
+    pub ability: abilities::names::Name,
     pub is_shiny: bool,
 
     pub friendship: u8,
@@ -28,4 +27,8 @@ pub struct Pokemon {
     pub move_2: Option<Move>,
     pub move_3: Option<Move>,
     pub move_4: Option<Move>,
+
+    pub evs: Stats,
+    pub ivs: Stats,
+    pub stats: Stats,
 }

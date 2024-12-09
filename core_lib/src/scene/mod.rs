@@ -1,8 +1,10 @@
 use camera::Camera;
 
+pub mod animation;
 pub mod camera;
 pub mod geometry;
 pub mod rendering;
+pub mod text;
 
 pub struct Scene {
     pub camera: Camera,

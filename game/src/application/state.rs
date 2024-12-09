@@ -62,7 +62,7 @@ impl ApplicationHandler for ApplicationState {
                 warn!("The application is not initialized correctly...")
             }
             ApplicationState::Initialized(app) => {
-                app.on_update();
+                app.on_update().expect("Failed to handle update event");
             }
         }
     }

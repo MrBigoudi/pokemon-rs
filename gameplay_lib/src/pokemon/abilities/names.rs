@@ -5,10 +5,9 @@ use log::error;
 
 #[derive(Debug)]
 pub enum Name {
-    Bulbasaur,
-    Ivysaur,
-    Venusaur,
-    //TODO: add more
+    Overgrow,
+    Chlorophyll,
+    // TODO: Add more
 }
 
 impl FromStr for Name {
@@ -16,11 +15,10 @@ impl FromStr for Name {
 
     fn from_str(name: &str) -> Result<Self, ErrorCode> {
         match name {
-            "Bulbasaur" => Ok(Name::Bulbasaur),
-            "Ivysaur" => Ok(Name::Ivysaur),
-            "Venusaur" => Ok(Name::Venusaur),
+            "Overgrow" => Ok(Name::Overgrow),
+            "Chlorophyll" => Ok(Name::Chlorophyll),
             _ => {
-                error!("The name {} is not a valid pokemon name", name);
+                error!("The name {} is not a valid ability name", name);
                 Err(ErrorCode::BadValue)
             }
         }

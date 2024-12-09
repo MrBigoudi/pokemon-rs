@@ -1,22 +1,70 @@
-[[pokemon]]
+[[pokedex]]
 
-[pokemon.bulbasaur]
+[pokedex.bulbasaur]
 id = 1
 name = "Bulbasaur"
 category = "Seed"
-description = 'For some time after its birth, it grows by taking nourishment from the seed on its back.'
+description = "For some time after its birth, it grows by taking nourishment from the seed on its back."
 height = 0.7
 weight = 6.9
 sprites = ["assets/sprites/pokemons/bulbasaur/front.png"] # TODO: add sprite paths
 shiny_sprites = ["assets/sprites/pokemons/bulbasaur/front_shiny.png"] # TODO: add sprite paths
 types = ["Grass", "Poison"]
+previous_evolution = 0
+next_evolution = 2
+evolution_type = {type="LevelUp", level=16} # leave empty if can't evolve
 egg_groups = ["Monster", "Grass"]
 hatch_time = 20
-gender_ratio = {male = 87.5, female = 12.5, neutral = 0}
+gender_ratio = {male = 87.5, female = 12.5, neutral = 0.0}
 abilities = ["Overgrow", "Chlorophyll"]
 catch_rate = 45
 base_friendship = 70
 base_experience_yield = 64
-ev_yield = ["SpecialAttack"]
-next_evolution = 2
+ev_yield = {hp=0, attack=0, defense=0, special_attack=1, special_defense=0, speed=0}
 base_stats = {hp=45, attack=49, defense=49, special_attack=65, special_defense=65, speed=45}
+
+[pokedex.ivysaur]
+id = 2
+name = "Ivysaur"
+category = "Seed"
+description = "When the bud on its back starts swelling, a sweet aroma wafts to indicate the flower's coming bloom."
+height = 1.0
+weight = 13.0
+sprites = ["assets/sprites/pokemons/ivysaur/front.png"]
+shiny_sprites = ["assets/sprites/pokemons/ivysaur/front_shiny.png"]
+types = ["Grass", "Poison"]
+previous_evolution = 1
+next_evolution = 3
+evolution_type = {type="LevelUp", level=32}
+egg_groups = ["Monster", "Grass"]
+hatch_time = 20
+gender_ratio = {male = 87.5, female = 12.5, neutral = 0.0}
+abilities = ["Overgrow", "Chlorophyll"]
+catch_rate = 45
+base_friendship = 70
+base_experience_yield = 141
+ev_yield = {hp=0, attack=0, defense=0, special_attack=1, special_defense=1, speed=0}
+base_stats = {hp=60, attack=62, defense=63, special_attack=80, special_defense=80, speed=60}
+
+[pokedex.venusaur]
+id = 3
+name = "Venusaur"
+category = "Seed"
+description = "After a rainy day, the flower on its back smells stronger. The scent attracts other Pokémon."
+height = 2.0
+weight = 100.0
+sprites = ["assets/sprites/pokemons/venusaur/front.png"]
+shiny_sprites = ["assets/sprites/pokemons/venusaur/front_shiny.png"]
+types = ["Grass", "Poison"]
+previous_evolution = 2
+next_evolution = 0
+evolution_type = {}
+egg_groups = ["Monster", "Grass"]
+hatch_time = 20
+gender_ratio = {male = 87.5, female = 12.5, neutral = 0.0}
+abilities = ["Overgrow", "Chlorophyll"]
+catch_rate = 45
+base_friendship = 70
+base_experience_yield = 208
+ev_yield = {hp=0, attack=0, defense=0, special_attack=2, special_defense=1, speed=0}
+base_stats = {hp=80, attack=82, defense=83, special_attack=100, special_defense=100, speed=80}

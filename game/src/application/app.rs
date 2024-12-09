@@ -24,6 +24,7 @@ pub struct Application {
 
     pub last_frame: Instant,
     pub delta_time: Duration,
+    pub target_frame_time: Duration,
 
     pub keys: HashMap<Key, KeyState>,
     pub last_keys: HashMap<Key, KeyState>,
@@ -112,25 +113,29 @@ impl Application {
 
         // TODO: add oter states
         if let Err(err) = game_states.add(Box::new(
-            gameplay_lib::states::concrete::test::GameStateTest::default(),
+            gameplay_lib::states::concrete::overworld::GameStateOverworld::default(),
         )) {
-            error!("Failed to create the test game state: {:?}", err);
+            error!("Failed to create the overworld game state: {:?}", err);
             return Err(ErrorCode::Unknown);
         }
         if let Err(err) = game_states.add(Box::new(
-            gameplay_lib::states::concrete::overworld_dialog::GameStateOverworldDialog::default(),
+            gameplay_lib::states::concrete::overworld_dialog::GameStateOverworldDialog::new()?,
         )) {
-            error!("Failed to create the overworld dialog game state: {:?}", err);
+            error!(
+                "Failed to create the overworld dialog game state: {:?}",
+                err
+            );
             return Err(ErrorCode::Unknown);
         }
-
 
         // TODO: remove this
-        if let Err(err) = game_states.push(gameplay_lib::states::state::GameStateType::Test) {
-            error!("Failed to push the test game state: {:?}", err);
+        if let Err(err) = game_states.push(gameplay_lib::states::state::GameStateType::Overworld) {
+            error!("Failed to push the overworld game state: {:?}", err);
             return Err(ErrorCode::Unknown);
         }
-        if let Err(err) = game_states.push(gameplay_lib::states::state::GameStateType::OverworldDialog) {
+        if let Err(err) =
+            game_states.push(gameplay_lib::states::state::GameStateType::OverworldDialog)
+        {
             error!("Failed to push the overworld dialog game state: {:?}", err);
             return Err(ErrorCode::Unknown);
         }
@@ -164,6 +169,8 @@ impl Application {
             wgpu_state,
             last_frame: Default::default(),
             delta_time: Default::default(),
+            target_frame_time: (1. / parameters.max_frame_rate as Duration),
+
             keys: Default::default(),
             last_keys: Default::default(),
 

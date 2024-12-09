@@ -1,3 +1,8 @@
+use std::str::FromStr;
+
+use core_lib::utils::debug::ErrorCode;
+use log::error;
+
 #[derive(Debug)]
 pub enum Gender {
     Male,
@@ -5,13 +10,14 @@ pub enum Gender {
     Neutral,
 }
 
+#[derive(Debug)]
 pub struct GenderRatio {
     pub male: f32,
     pub female: f32,
     pub neutral: f32,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum EggGroup {
     Monster,
     HumanLike,
@@ -30,11 +36,35 @@ pub enum EggGroup {
     NoEggsDiscovered,
 }
 
-pub const NB_STEPS_PER_EGG_CYCLE: u8 = 0xFF;
+impl FromStr for EggGroup {
+    fn from_str(egg_group: &str) -> Result<Self, ErrorCode> {
+        match egg_group {
+            "Monster" => Ok(EggGroup::Monster),
+            "HumanLike" => Ok(EggGroup::HumanLike),
+            "Water1" => Ok(EggGroup::Water1),
+            "Water2" => Ok(EggGroup::Water2),
+            "Water3" => Ok(EggGroup::Water3),
+            "Bug" => Ok(EggGroup::Bug),
+            "Mineral" => Ok(EggGroup::Mineral),
+            "Flying" => Ok(EggGroup::Flying),
+            "Amorphous" => Ok(EggGroup::Amorphous),
+            "Field" => Ok(EggGroup::Field),
+            "Fairy" => Ok(EggGroup::Fairy),
+            "Ditto" => Ok(EggGroup::Ditto),
+            "Grass" => Ok(EggGroup::Grass),
+            "Dragon" => Ok(EggGroup::Dragon),
+            "NoEggsDiscovered" => Ok(EggGroup::NoEggsDiscovered),
+            _ => {
+                error!(
+                    "The egg group {} is not a valid pokemon egg group",
+                    egg_group
+                );
+                Err(ErrorCode::BadValue)
+            }
+        }
+    }
 
-pub struct BreedingAttributes {
-    pub egg_group_1: EggGroup,
-    pub egg_group_2: Option<EggGroup>,
-    pub hatch_time: Option<u8>,
-    pub gender_ratio: GenderRatio,
+    type Err = ErrorCode;
 }
+
+pub const NB_STEPS_PER_EGG_CYCLE: u8 = 0xFF;
